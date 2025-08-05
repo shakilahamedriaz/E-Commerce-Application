@@ -96,7 +96,6 @@ class CartItem(models.Model):
         return self.product.price * self.quantity
    
 
-
 class Order(models.Model):
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
@@ -128,7 +127,6 @@ class Order(models.Model):
     
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
-
 
 
 # Order Items for products in the order
