@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth
     'shop',  # created custom app for the e-shop 
 
 
@@ -83,6 +84,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -141,7 +143,21 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+#allauth settings
+
+SITE_ID = 2
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+

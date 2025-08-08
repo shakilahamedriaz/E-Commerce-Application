@@ -6,7 +6,7 @@ from .models import Rating, Order
 
 
 # Registration Form
-class RegisterForm(UserCreationForm):
+class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
@@ -23,6 +23,15 @@ class RegisterForm(UserCreationForm):
             'password2': forms.PasswordInput(attrs={'placeholder': 'Confirm Password'}),
         }
 
+
+# Login Form
+class UserLoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'form-control'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'})
+    )
 
 
 # Rating Form

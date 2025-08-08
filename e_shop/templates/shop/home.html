@@ -1,0 +1,64 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Home - E-Shop{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+    <h1 class="display-4">Welcome to E-Shop!</h1>
+    <p class="lead">Your one-stop destination for all your shopping needs.</p>
+    {% if not user.is_authenticated %}
+        <a class="btn btn-light btn-lg" href="{% url 'register' %}" role="button">Get Started</a>
+    {% else %}
+        <p class="lead">Welcome back, {{ user.first_name|default:user.username }}!</p>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Featured Products</h5>
+                <p class="card-text">Browse our latest and most popular products.</p>
+                <a href="#" class="btn btn-primary">View Products</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Categories</h5>
+                <p class="card-text">Explore products by categories.</p>
+                <a href="#" class="btn btn-primary">Browse Categories</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Special Offers</h5>
+                <p class="card-text">Don't miss out on our amazing deals.</p>
+                <a href="#" class="btn btn-primary">View Offers</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h3>Quick Actions</h3>
+        <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action">
+                <strong>My Cart</strong> - View items in your cart
+            </a>
+            <a href="#" class="list-group-item list-group-item-action">
+                <strong>My Orders</strong> - Track your order history
+            </a>
+            <a href="#" class="list-group-item list-group-item-action">
+                <strong>My Profile</strong> - Update your account information
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
