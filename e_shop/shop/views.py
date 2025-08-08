@@ -15,11 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Create your views from here ..... 
 
-# Home view
-def home(request):
-    return render(request, 'shop/home.html')
 
-#authentication views
+# login view
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -27,14 +24,14 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            return redirect('shop:register')
         else:
-            messages.error(request, "Invalid username or password")
-            return render(request, 'shop/login.html')
+            messages.error(request, 'Invalid username or password')
+
     return render(request, 'shop/login.html')
 
 
-
+# Register view
 def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
@@ -42,7 +39,7 @@ def register_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, "Registration successful")
-            return redirect('home')
+            return redirect('shop:login')
         else:
             messages.error(request, "Registration failed. Please correct the errors below.")
     else:
@@ -50,12 +47,15 @@ def register_view(request):
     return render(request, 'shop/register.html', {'form': form})
 
 
+# Logout view
 def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
-    return redirect('home')
+    return redirect('shop:login')
 
 
+
+# Home view
 def home(request):
     featured_products = Product.objects.filter(available=True).order_by('-created_at')[:8]
     categories = Category.objects.all()
@@ -66,6 +66,7 @@ def home(request):
     })
 
 
+# Product list view
 def product_list(request, category_slug=None):
     category = None
     categories = Category.objects.all()
@@ -99,7 +100,7 @@ def product_list(request, category_slug=None):
             Q(category__icontains=query)
         )
 
-    return render(request, 'shop/product/list.html', {
+    return render(request, 'shop/product_list.html', {
         'category': category,
         'categories': categories,
         'products': products,
@@ -109,6 +110,7 @@ def product_list(request, category_slug=None):
     })
 
 
+# Product detail view
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, available = True)
     related_products = Product.objects.filter(category = product.category).exclude(id=product.id)
@@ -121,7 +123,7 @@ def product_detail(request, slug):
             pass
     rating_form = RatingForm(instance=user_rating)
 
-    return render(request, 'shop/product/detail.html', {
+    return render(request, 'shop/product_detail.html', {
         'product': product,
         'related_products': related_products,
         'user_rating': user_rating,
@@ -129,6 +131,8 @@ def product_detail(request, slug):
     })
 
 
+
+# Cart detail view
 @login_required
 def cart_detail(request):
    try:
@@ -136,13 +140,14 @@ def cart_detail(request):
    except Cart.DoesNotExist:
        cart = Cart.objects.create(user=request.user)
 
-   return render(request, 'shop/cart/detail.html', {
+   return render(request, 'shop/cart_detail.html', {
        'cart': cart
    })
 
 
 
 
+# Cart add view
 @login_required
 def cart_add(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -159,9 +164,10 @@ def cart_add(request, product_id):
         CartItem.objects.create(cart=cart, product=product, quantity=1)
 
     messages.success(request, f"{product.name} has been added to your cart.")
-    return redirect('')
+    return redirect('shop:product_detail', slug=product.slug)
 
 
+# Cart remove view
 @login_required
 def cart_remove(request, product_id):
     cart = get_object_or_404(Cart, user=request.user)
@@ -169,9 +175,11 @@ def cart_remove(request, product_id):
     cart_item = get_object_or_404(CartItem, cart=cart, product=product)
     cart_item.delete()
     messages.success(request, f"{product.name} has been removed from your cart.")
-    return redirect('')
+    return redirect('shop:cart_detail')
 
 
+
+# Cart update view
 @login_required
 def cart_update(request, product_id):
     cart = get_object_or_404(Cart, user=request.user)
@@ -187,11 +195,11 @@ def cart_update(request, product_id):
         cart_item.quantity = quantity
         cart.save()
         messages.success(request, f"{product.name} has been updated in your cart.")
-    return redirect('')
+    return redirect('shop:cart_detail')
 
 
 
-
+# Checkout view
 @login_required
 def checkout(request):
     try:
@@ -201,8 +209,8 @@ def checkout(request):
             return redirect('')
     except Cart.DoesNotExist:
         messages.warning(request, 'Your cart is empty!')
-        return redirect('')
-    
+        return redirect('shop:cart_detail')
+
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
@@ -215,7 +223,7 @@ def checkout(request):
             cart.items.all().delete()
             request.session['order_id'] = order.id
             messages.success(request, 'Your order has been placed successfully!')
-            return redirect('order_success')
+            return redirect('shop:payment_process')
     else:
         initial_data = {}
         if request.user.first_name:
@@ -232,14 +240,14 @@ def checkout(request):
        })
 
 
-
-@csrf_exempt 
+# Payment process view
+@csrf_exempt    # use this decorator to exempt the view from CSRF verification for payment processing
 @login_required
 def payment_process(request):
     order_id = request.session.get('order_id')
     if not order_id:
         messages.error(request, 'No order found.')
-        return redirect('cart_detail')
+        return redirect('shop:home')
     
     order = get_object_or_404(Order, id=order_id, user=request.user)
     payment_data = generate_sslcommerz_payment(order, request)
@@ -250,9 +258,10 @@ def payment_process(request):
     else:
         # Payment failed
         messages.error(request, 'Payment failed. Please try again.')
-        return redirect('')
-    
+        return redirect('shop:checkout')
 
+
+# Payment success view
 @csrf_exempt
 @login_required
 def payment_success(request, order_id):
@@ -273,29 +282,32 @@ def payment_success(request, order_id):
 
     send_order_confirmation_email(order)
     messages.success(request, 'Payment successful! Your order has been placed.')
-    return redirect('order_success')
+    return redirect('shop:profile')
 
 
 
+# Payment fail view
 @csrf_exempt
 @login_required
 def payment_fail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order.status = 'canceled'
     order.save()
-    return redirect('order_failure')
+    return redirect('shop:checkout')
 
 
 
+# Payment cancel view
 @csrf_exempt
 @login_required
 def payment_cancel(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order.status = 'canceled'
     order.save()
-    return redirect('order_canceled')
+    return redirect('shop:cart_detail')
 
 
+# Profile view
 @login_required
 def profile(request):
     tab = request.GET.get('tab')
@@ -304,7 +316,7 @@ def profile(request):
     total_spent = sum(order.get_total_cost for order in orders if order.paid)
     order_history_active = (tab == 'orders')
 
-    return render(request, '', {
+    return render(request, 'shop/profile.html', {
         'user' : request.user,
         'orders' : orders,
         'order_history_active' : order_history_active,
@@ -314,7 +326,7 @@ def profile(request):
 
 
 
-
+# Rate product view
 @login_required
 def rate_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -326,8 +338,8 @@ def rate_product(request, product_id):
 
     if not ordered_items.exists():
         messages.warning(request, 'You can only rate products you have purchased')
-        return redirect('')
-    
+        return redirect('shop:product_detail', slug=product.slug)
+
     try:
         rating = Rating.objects.get(product=product, user=request.user)
     except Rating.DoesNotExist:
@@ -340,7 +352,7 @@ def rate_product(request, product_id):
             rating.product = product
             rating.user = request.user
             rating.save()
-            return redirect('')
+            return redirect('shop:product_detail')
     else:
         form = RatingForm(instance=rating)
     
