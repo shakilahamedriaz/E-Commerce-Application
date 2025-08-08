@@ -8,6 +8,8 @@ from .forms import UserRegistrationForm, UserLoginForm, RatingForm, CheckoutForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Min, Max, Avg
 from django.contrib.auth.decorators import login_required
+from .utils import generate_sslcommerz_payment, send_order_confirmation_email
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -188,6 +190,8 @@ def cart_update(request, product_id):
     return redirect('')
 
 
+
+
 @login_required
 def checkout(request):
     try:
@@ -226,3 +230,123 @@ def checkout(request):
            'cart': cart,
            'form': form
        })
+
+
+
+@csrf_exempt 
+@login_required
+def payment_process(request):
+    order_id = request.session.get('order_id')
+    if not order_id:
+        messages.error(request, 'No order found.')
+        return redirect('cart_detail')
+    
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    payment_data = generate_sslcommerz_payment(order, request)
+
+    if payment_data['status'] == 'SUCCESS':
+        # Payment was successful
+        return redirect(payment_data['GatewayPageURL'])
+    else:
+        # Payment failed
+        messages.error(request, 'Payment failed. Please try again.')
+        return redirect('')
+    
+
+@csrf_exempt
+@login_required
+def payment_success(request, order_id):
+    order=get_object_or_404(Order, id=order_id, user=request.user)
+    order.paid = True
+    order.status = 'processing'
+    order.transaction_id = order.id
+    order.save()
+
+    order_items = order.items.all()
+    for item in order_items:
+        product = item.product
+        product.stock -= item.quantity
+
+        if product.stock < 0:
+            product.stock = 0
+        product.save()
+
+    send_order_confirmation_email(order)
+    messages.success(request, 'Payment successful! Your order has been placed.')
+    return redirect('order_success')
+
+
+
+@csrf_exempt
+@login_required
+def payment_fail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.status = 'canceled'
+    order.save()
+    return redirect('order_failure')
+
+
+
+@csrf_exempt
+@login_required
+def payment_cancel(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    order.status = 'canceled'
+    order.save()
+    return redirect('order_canceled')
+
+
+@login_required
+def profile(request):
+    tab = request.GET.get('tab')
+    orders = Order.objects.filter(user=request.user).order_by('-created')
+    completed_orders = orders.filter(status = 'delivered').count()
+    total_spent = sum(order.get_total_cost for order in orders if order.paid)
+    order_history_active = (tab == 'orders')
+
+    return render(request, '', {
+        'user' : request.user,
+        'orders' : orders,
+        'order_history_active' : order_history_active,
+        'completed_orders' : completed_orders,
+        'total_spent' : total_spent
+    })
+
+
+
+
+@login_required
+def rate_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    ordered_items = OrderItem.objects.filter(
+        order__user=request.user,
+        order__paid=True,
+        product=product
+    )
+
+    if not ordered_items.exists():
+        messages.warning(request, 'You can only rate products you have purchased')
+        return redirect('')
+    
+    try:
+        rating = Rating.objects.get(product=product, user=request.user)
+    except Rating.DoesNotExist:
+        rating = None
+
+    if request.method == 'POST':
+        form = RatingForm(request.POST, instance=rating)
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.product = product
+            rating.user = request.user
+            rating.save()
+            return redirect('')
+    else:
+        form = RatingForm(instance=rating)
+    
+
+    return render(request, 'shop/rate_product.html', {
+        'form': form,
+        'product': product,
+        'rating': rating
+    })

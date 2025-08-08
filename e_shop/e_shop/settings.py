@@ -144,9 +144,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 #allauth settings
-
 SITE_ID = 2
-
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
@@ -154,10 +152,31 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+
+
+# sslcommerz settings
+SSLCOMMERZ_STORE_ID = 'eshop689628c65c7b8'
+SSLCOMMERZ_STORE_PASSWORD = 'eshop689628c65c7b8@ssl'
+
+SSLCOMMERZ_PAYMENT_URL = 'https://sandbox.sslcommerz.com/gwprocess/v3/api.php'
+SSLCOMMERZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php'
+
+
+
+# Email setup
+# email setup
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'riaz35-995@diu.edu.bd'
+EMAIL_HOST_PASSWORD = 'wdvw jmqc bwmc xdsd'
+
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
+wdvw jmqc bwmc xdsd
