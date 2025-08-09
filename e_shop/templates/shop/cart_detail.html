@@ -10,17 +10,17 @@
   <tbody>
   {% for row in items_with_alt %}
     <tr>
-      <td><a href="{% url 'product_detail' row.item.product.slug %}">{{ row.item.product.name }}</a></td>
+  <td><a href="{% url 'shop:product_detail' row.item.product.slug %}">{{ row.item.product.name }}</a></td>
       <td class="text-center">{{ row.item.quantity }}</td>
       <td>${{ row.item.get_cost }}</td>
       <td>{{ row.line_footprint }} kg</td>
       <td>
         {% if row.alt %}
-          <a href="{% url 'product_detail' row.alt.slug %}">{{ row.alt.name }}</a>
+          <a href="{% url 'shop:product_detail' row.alt.slug %}">{{ row.alt.name }}</a>
           {% if row.potential_save > 0 %}<div class="small text-success">Save {{ row.potential_save }} kg</div>{% endif %}
         {% else %}-{% endif %}
       </td>
-      <td><a class="btn btn-sm btn-outline-danger" href="{% url 'cart_remove' row.item.product.id %}"><i class="fa fa-times"></i></a></td>
+  <td><a class="btn btn-sm btn-outline-danger" href="{% url 'shop:cart_remove' row.item.product.id %}"><i class="fa fa-times"></i></a></td>
     </tr>
   {% endfor %}
   </tbody>
@@ -31,11 +31,11 @@
     <p class="mb-0 small">Cart footprint: <strong>{{ total_footprint }} kg CO₂e</strong></p>
   </div>
   <div class="d-flex gap-2">
-    <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">Continue Shopping</a>
-    <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+  <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary">Continue Shopping</a>
+  <a href="{% url 'shop:checkout' %}" class="btn btn-primary">Checkout</a>
   </div>
 </div>
 {% else %}
-  <p>Your cart is empty. <a href="{% url 'product_list' %}">Browse products</a>.</p>
+  <p>Your cart is empty. <a href="{% url 'shop:product_list' %}">Browse products</a>.</p>
 {% endif %}
 {% endblock %}

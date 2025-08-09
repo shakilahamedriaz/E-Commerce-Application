@@ -4,6 +4,7 @@ from shop.models import OrderImpact
 # Simple projection: use average of last N orders, apply reduction_target (%), and project months_ahead
 
 def average_recent_carbon(user, orders_count=3):
+    # OrderImpact has created_at; order has created. We use impact timestamp for recency.
     qs = OrderImpact.objects.filter(order__user=user).order_by('-created_at')[:orders_count]
     totals = [oi.carbon_kg for oi in qs]
     if not totals:

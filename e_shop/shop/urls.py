@@ -1,6 +1,8 @@
 from .import views
 from django.urls import path
 
+app_name = 'shop'
+
 urlpatterns = [
     path('login/', views.login_view, name="login"),
     path('register/', views.register_view, name="register"),
@@ -8,8 +10,9 @@ urlpatterns = [
 
     path('', views.home, name='home'),
     path('products/', views.product_list, name='product_list'),
+    # Category listing and product detail had ambiguous patterns; product detail moved under 'product/' prefix
     path('products/<slug:category_slug>/', views.product_list, name='product_list_by_category'),
-    path('products/<slug:slug>/', views.product_detail, name='product_detail'),
+    path('product/<slug:slug>/', views.product_detail, name='product_detail'),
 
     path('cart/', views.cart_detail, name='cart_detail'),
     path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),

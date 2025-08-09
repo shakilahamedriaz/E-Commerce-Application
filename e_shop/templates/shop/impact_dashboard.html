@@ -16,7 +16,7 @@
       {% endif %}
       <hr>
       <h6 class="fw-bold">Set Budget</h6>
-      <form method="post" action="{% url 'set_budget' %}" class="d-flex gap-2 align-items-end">{% csrf_token %}
+  <form method="post" action="{% url 'shop:set_budget' %}" class="d-flex gap-2 align-items-end">{% csrf_token %}
         <div class="flex-grow-1">{{ budget_form.month_budget_kg }}</div>
         <button class="btn btn-primary btn-sm">Save</button>
       </form>
@@ -25,7 +25,7 @@
   <div class="col-md-4">
     <div class="card p-3 h-100">
       <h6 class="fw-bold mb-3">What-If Simulator</h6>
-      <form method="post" action="{% url 'what_if_simulator' %}" class="small">{% csrf_token %}
+  <form method="post" action="{% url 'shop:what_if_simulator' %}" class="small">{% csrf_token %}
         <label class="form-label mt-1">Swap Fraction (0-1)</label>
         <input type="number" name="swap_fraction" step="0.1" value="0.5" class="form-control form-control-sm">
         <label class="form-label mt-2">Saving Ratio (0-1)</label>
@@ -57,6 +57,19 @@
           {% empty %}<tr><td colspan="3" class="text-muted">No recent data.</td></tr>{% endfor %}
           </tbody>
         </table>
+      </div>
+      <hr>
+      <h6 class="fw-bold mb-2">Badges</h6>
+      <div class="d-flex flex-wrap gap-2">
+        {% with user.badges.all as mybadges %}
+          {% if mybadges %}
+            {% for ub in mybadges %}
+              <span class="badge badge-impact" title="{{ ub.badge.description }}">{{ ub.badge.name }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="text-muted small">No badges yet.</span>
+          {% endif %}
+        {% endwith %}
       </div>
     </div>
   </div>

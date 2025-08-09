@@ -1,5 +1,6 @@
 from decimal import Decimal
 from shop.models import Product, OrderImpact, UserImpact, Order
+from . import badges as badge_service
 
 
 def category_baseline_for_product(product: Product) -> Decimal:
@@ -35,7 +36,17 @@ def update_user_impact(order: Order, carbon_total: Decimal, saved: Decimal):
     ui.total_carbon_kg += carbon_total
     ui.total_saved_kg += saved
     ui.current_month_carbon_kg += carbon_total  # simple accumulation; monthly reset can adjust
+    # streak logic: saved > 0 means below baseline
+    if saved > 0:
+        ui.low_impact_streak += 1
+    else:
+        ui.low_impact_streak = 0
     ui.save()
+    # award badges after save
+    try:
+        badge_service.evaluate_and_award(order.user, ui, saved)
+    except Exception:
+        pass
 
 
 def record_order_impact(order: Order):

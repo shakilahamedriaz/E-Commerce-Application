@@ -1,7 +1,6 @@
 from unicodedata import category
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
-from urllib3 import request
 from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem
 from .services.alternatives import greener_alternative, swap_ladder
 from django.contrib import messages
@@ -15,6 +14,7 @@ from .services.budget import budget_status, update_budget
 from .services.simulator import project_scenario
 from .forms import CarbonBudgetForm
 from django.views.decorators.csrf import csrf_exempt
+from .services.impact import record_order_impact
 
 
 
@@ -62,7 +62,8 @@ def logout_view(request):
 
 # Home view
 def home(request):
-    featured_products = Product.objects.filter(available=True).order_by('-created_at')[:8]
+    # Product model uses 'created' field (not 'created_at')
+    featured_products = Product.objects.filter(available=True).order_by('-created')[:8]
     categories = Category.objects.all()
 
     return render(request, 'shop/home.html', {
@@ -75,34 +76,40 @@ def home(request):
 def product_list(request, category_slug=None):
     category = None
     categories = Category.objects.all()
-    products = Product.objects.filter(available = True)
-    
-    if category_slug :
+    products = Product.objects.filter(available=True)
+
+    if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
         products = products.filter(category=category)
 
-    min_price = products.aggregate(Min('price'))['price_min']
-    max_price = products.aggregate(Max('price'))['price_max']
-    
-    if request.GET.get(min_price) and request.GET.get(max_price):
-        min_price = request.GET.get('min_price')
-        max_price = request.GET.get('max_price')
-        products = products.filter(price__gte=min_price, price__lte=max_price)
+    price_range = products.aggregate(min_price=Min('price'), max_price=Max('price'))
+    min_price = price_range['min_price']
+    max_price = price_range['max_price']
 
+    # Filters
     if request.GET.get('min_price'):
-        products = products.filter(price__gte=request.GET.get('min_price'))
+        try:
+            products = products.filter(price__gte=Decimal(request.GET.get('min_price')))
+        except Exception:
+            pass
     if request.GET.get('max_price'):
-        products = products.filter(price__lte=request.GET.get('max_price'))
+        try:
+            products = products.filter(price__lte=Decimal(request.GET.get('max_price')))
+        except Exception:
+            pass
     if request.GET.get('rating'):
-        min_rating = request.GET.get('rating')
-        products = products.annotate(avg_rating=Avg('ratings__rating')).filter(avg_rating__gte=min_rating)
+        try:
+            min_rating = int(request.GET.get('rating'))
+            products = products.annotate(avg_rating=Avg('ratings__rating')).filter(avg_rating__gte=min_rating)
+        except Exception:
+            pass
 
-    if request.GET.get('search'):
-        query = request.GET.get('search')
+    query = request.GET.get('search', '').strip()
+    if query:
         products = products.filter(
             Q(name__icontains=query) |
             Q(description__icontains=query) |
-            Q(category__icontains=query)
+            Q(category__name__icontains=query)
         )
 
     return render(request, 'shop/product_list.html', {
@@ -111,7 +118,7 @@ def product_list(request, category_slug=None):
         'products': products,
         'min_price': min_price,
         'max_price': max_price,
-        'search_query': query
+        'search_query': query,
     })
 
 
@@ -223,7 +230,7 @@ def cart_update(request, product_id):
         messages.success(request, f"{product.name} has been removed from your cart!")
     else:
         cart_item.quantity = quantity
-        cart.save()
+        cart_item.save()
         messages.success(request, f"{product.name} has been updated in your cart.")
     return redirect('shop:cart_detail')
 
@@ -236,7 +243,7 @@ def checkout(request):
         cart = Cart.objects.get(user=request.user)
         if not cart.items.exists():
             messages.warning(request, 'Your cart is empty!')
-            return redirect('')
+            return redirect('shop:home')
     except Cart.DoesNotExist:
         messages.warning(request, 'Your cart is empty!')
         return redirect('shop:cart_detail')
@@ -297,7 +304,8 @@ def payment_process(request):
 def payment_success(request, order_id):
     order=get_object_or_404(Order, id=order_id, user=request.user)
     order.paid = True
-    order.status = 'processing'
+    # Align with defined choices ('Processing')
+    order.status = 'Processing'
     order.transaction_id = order.id
     order.save()
 
@@ -310,6 +318,11 @@ def payment_success(request, order_id):
             product.stock = 0
         product.save()
 
+    # Record sustainability impact after successful payment
+    try:
+        record_order_impact(order)
+    except Exception:
+        pass
     send_order_confirmation_email(order)
     messages.success(request, 'Payment successful! Your order has been placed.')
     return redirect('shop:profile')
@@ -321,7 +334,7 @@ def payment_success(request, order_id):
 @login_required
 def payment_fail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    order.status = 'canceled'
+    order.status = 'Cancelled'
     order.save()
     return redirect('shop:checkout')
 
@@ -332,7 +345,7 @@ def payment_fail(request, order_id):
 @login_required
 def payment_cancel(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
-    order.status = 'canceled'
+    order.status = 'Cancelled'
     order.save()
     return redirect('shop:cart_detail')
 
@@ -342,7 +355,7 @@ def payment_cancel(request, order_id):
 def profile(request):
     tab = request.GET.get('tab')
     orders = Order.objects.filter(user=request.user).order_by('-created')
-    completed_orders = orders.filter(status = 'delivered').count()
+    completed_orders = orders.filter(status='Delivered').count()
     total_spent = sum(order.get_total_cost for order in orders if order.paid)
     order_history_active = (tab == 'orders')
     return render(request, 'shop/profile.html', {

@@ -179,6 +179,7 @@ class UserImpact(models.Model):
     total_saved_kg = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Baseline - actual cumulative")
     current_month_carbon_kg = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     month_budget_kg = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="User-set monthly carbon budget")
+    low_impact_streak = models.PositiveIntegerField(default=0, help_text="Consecutive below-baseline (saved>0) orders")
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -194,3 +195,27 @@ class OrderImpact(models.Model):
 
     def __str__(self):
         return f"OrderImpact(order={self.order_id}, carbon={self.carbon_kg})"
+
+
+class Badge(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=80)
+    description = models.TextField(blank=True)
+    condition_type = models.CharField(max_length=50, help_text="Metric key, e.g. TOTAL_SAVED, STREAK, FIRST_ORDER")
+    threshold = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name='holders')
+    earned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'badge')
+
+    def __str__(self):
+        return f"{self.user} -> {self.badge.code}"

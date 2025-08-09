@@ -9,7 +9,7 @@
       <p class="mb-1 fw-semibold">{{ user.username }}</p>
       <p class="small mb-2 text-muted">{{ user.email }}</p>
       <p class="small">Joined: {{ user.date_joined|date:'M d, Y' }}</p>
-      <a href="{% url 'impact_dashboard' %}" class="btn btn-sm btn-primary mt-2">Impact Dashboard</a>
+  <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-sm btn-primary mt-2">Impact Dashboard</a>
     </div>
   </div>
   <div class="col-md-8">

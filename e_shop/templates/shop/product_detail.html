@@ -17,16 +17,16 @@
     </div>
     <h4 class="text-success mb-3">${{ product.price }}</h4>
     {% if user.is_authenticated %}
-      <a href="{% url 'cart_add' product.id %}" class="btn btn-primary me-2"><i class="fa fa-cart-plus me-1"></i>Add to Cart</a>
+  <a href="{% url 'shop:cart_add' product.id %}" class="btn btn-primary me-2"><i class="fa fa-cart-plus me-1"></i>Add to Cart</a>
     {% else %}
-      <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">Login to Buy</a>
+  <a href="{% url 'shop:login' %}?next={{ request.path }}" class="btn btn-primary">Login to Buy</a>
     {% endif %}
     <hr>
     {% if alternative %}
-    <p class="impact-alt">Greener alternative: <a href="{% url 'product_detail' alternative.slug %}">{{ alternative.name }}</a> ({{ alternative.effective_carbon_kg }} kg CO₂e)</p>
+  <p class="impact-alt">Greener alternative: <a href="{% url 'shop:product_detail' alternative.slug %}">{{ alternative.name }}</a> ({{ alternative.effective_carbon_kg }} kg CO₂e)</p>
     {% endif %}
     {% if ladder.best and ladder.best.id != product.id %}
-    <p class="impact-alt">Best in category: <a href="{% url 'product_detail' ladder.best.slug %}">{{ ladder.best.name }}</a> ({{ ladder.best.effective_carbon_kg }} kg)</p>
+  <p class="impact-alt">Best in category: <a href="{% url 'shop:product_detail' ladder.best.slug %}">{{ ladder.best.name }}</a> ({{ ladder.best.effective_carbon_kg }} kg)</p>
     {% endif %}
   </div>
 </div>
@@ -39,7 +39,7 @@
       <div class="card h-100">
         {% if rp.image %}<img src="{{ rp.image.url }}" class="card-img-top" style="object-fit:cover;height:110px">{% endif %}
         <div class="card-body p-2">
-          <a class="small fw-semibold d-block" href="{% url 'product_detail' rp.slug %}">{{ rp.name }}</a>
+          <a class="small fw-semibold d-block" href="{% url 'shop:product_detail' rp.slug %}">{{ rp.name }}</a>
           <span class="small text-muted">${{ rp.price }}</span>
         </div>
       </div>
@@ -51,13 +51,13 @@
 <div class="mt-5">
   <h5>Your Rating</h5>
   {% if user.is_authenticated %}
-    <form action="{% url 'rate_product' product.id %}" method="post" class="row g-2 align-items-end">{% csrf_token %}
+  <form action="{% url 'shop:rate_product' product.id %}" method="post" class="row g-2 align-items-end">{% csrf_token %}
       <div class="col-sm-3">{{ rating_form.rating }}</div>
       <div class="col-sm-6">{{ rating_form.comment }}</div>
       <div class="col-sm-3 d-grid"><button class="btn btn-success">Save</button></div>
     </form>
   {% else %}
-    <p><a href="{% url 'login' %}">Login</a> to rate this product.</p>
+  <p><a href="{% url 'shop:login' %}">Login</a> to rate this product.</p>
   {% endif %}
 </div>
 {% endblock %}

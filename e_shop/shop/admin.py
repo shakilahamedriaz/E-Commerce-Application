@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem, UserImpact, OrderImpact
+from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem, UserImpact, OrderImpact, Badge, UserBadge
 from django.contrib.auth.models import User
 
 # Register your models here.
@@ -73,3 +73,15 @@ class UserImpactAdmin(admin.ModelAdmin):
 class OrderImpactAdmin(admin.ModelAdmin):
     list_display = ('order', 'carbon_kg', 'baseline_kg', 'saved_kg', 'created_at')
     search_fields = ('order__id', 'order__user__username')
+
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name', 'condition_type', 'threshold')
+    search_fields = ('code', 'name')
+
+
+@admin.register(UserBadge)
+class UserBadgeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'badge', 'earned_at')
+    search_fields = ('user__username', 'badge__code')

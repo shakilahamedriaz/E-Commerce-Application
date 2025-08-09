@@ -27,31 +27,31 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">E-Shop</a>
+            <a class="navbar-brand fw-bold" href="{% url 'shop:home' %}">E-Shop</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_list' %}">Products</a></li>
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'cart_detail' %}"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'impact_dashboard' %}">Impact</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:cart_detail' %}"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:impact_dashboard' %}">Impact</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:profile' %}">Profile</a></li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
                     </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout ({{ user.username }})</a>
+                            <a class="nav-link" href="{% url 'shop:logout' %}">Logout ({{ user.username }})</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'shop:login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'shop:register' %}">Register</a>
                         </li>
                     {% endif %}
                 </ul>
