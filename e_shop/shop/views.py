@@ -3,12 +3,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from urllib3 import request
 from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem
+from .services.alternatives import greener_alternative, swap_ladder
 from django.contrib import messages
 from .forms import UserRegistrationForm, UserLoginForm, RatingForm, CheckoutForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Min, Max, Avg
 from django.contrib.auth.decorators import login_required
 from .utils import generate_sslcommerz_payment, send_order_confirmation_email
+from decimal import Decimal
+from .services.budget import budget_status, update_budget
+from .services.simulator import project_scenario
+from .forms import CarbonBudgetForm
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -123,11 +128,17 @@ def product_detail(request, slug):
             pass
     rating_form = RatingForm(instance=user_rating)
 
+    # Impact additions
+    alternative = greener_alternative(product)
+    ladder = swap_ladder(product)
+
     return render(request, 'shop/product_detail.html', {
         'product': product,
         'related_products': related_products,
         'user_rating': user_rating,
-        'rating_form': rating_form
+        'rating_form': rating_form,
+        'alternative': alternative,
+        'ladder': ladder,
     })
 
 
@@ -139,9 +150,28 @@ def cart_detail(request):
        cart = Cart.objects.get(user=request.user)
    except Cart.DoesNotExist:
        cart = Cart.objects.create(user=request.user)
+   # Build items footprint + alternative suggestions
+   items_with_alt = []
+   total_footprint = 0
+   for item in cart.items.select_related('product', 'product__category'):
+       p = item.product
+       line_footprint = p.effective_carbon_kg() * item.quantity if hasattr(p, 'effective_carbon_kg') else 0
+       total_footprint += line_footprint
+       alt = greener_alternative(p)
+       potential_save = 0
+       if alt:
+           potential_save = max((p.effective_carbon_kg() - alt.effective_carbon_kg()) * item.quantity, 0)
+       items_with_alt.append({
+           'item': item,
+           'alt': alt,
+           'line_footprint': line_footprint,
+           'potential_save': potential_save,
+       })
 
    return render(request, 'shop/cart_detail.html', {
-       'cart': cart
+       'cart': cart,
+       'items_with_alt': items_with_alt,
+       'total_footprint': total_footprint,
    })
 
 
@@ -315,14 +345,69 @@ def profile(request):
     completed_orders = orders.filter(status = 'delivered').count()
     total_spent = sum(order.get_total_cost for order in orders if order.paid)
     order_history_active = (tab == 'orders')
-
     return render(request, 'shop/profile.html', {
         'user' : request.user,
         'orders' : orders,
         'order_history_active' : order_history_active,
         'completed_orders' : completed_orders,
-        'total_spent' : total_spent
+        'total_spent' : total_spent,
     })
+
+
+# Impact dashboard view
+@login_required
+def impact_dashboard(request):
+    ui = getattr(request.user, 'impact_summary', None)
+    status = budget_status(request.user)
+    recent_impacts = []
+    if ui:
+        recent_impacts = [
+            {
+                'id': oi.order_id,
+                'carbon': oi.carbon_kg,
+                'saved': oi.saved_kg,
+                'created': oi.created_at,
+            }
+            for oi in getattr(request.user, 'orders').all()[:5]
+            if hasattr(oi, 'impact')
+        ]
+    form = CarbonBudgetForm(initial={'month_budget_kg': ui.month_budget_kg if ui else 0})
+    return render(request, 'shop/impact_dashboard.html', {
+        'impact': ui,
+        'budget_status': status,
+        'recent_impacts': recent_impacts,
+        'budget_form': form,
+    })
+
+
+# Update budget view
+@login_required
+def set_budget(request):
+    if request.method == 'POST':
+        form = CarbonBudgetForm(request.POST)
+        if form.is_valid():
+            update_budget(request.user, form.cleaned_data['month_budget_kg'])
+            messages.success(request, 'Budget updated.')
+            return redirect('shop:impact_dashboard')
+    return redirect('shop:impact_dashboard')
+
+
+# Simple what-if simulator (POST)
+@login_required
+def what_if_simulator(request):
+    if request.method == 'POST':
+        try:
+            swap_fraction = Decimal(request.POST.get('swap_fraction', '0'))  # 0-1
+            saving_ratio = Decimal(request.POST.get('saving_ratio', '0.3'))   # average per swap
+            months = int(request.POST.get('months', '3'))
+        except Exception:
+            messages.error(request, 'Invalid input for simulation.')
+            return redirect('shop:impact_dashboard')
+        from decimal import Decimal as D
+        result = project_scenario(request.user, swap_fraction, saving_ratio, months)
+        request.session['simulator_result'] = {k: str(v) for k,v in result.items()}
+        return redirect('shop:impact_dashboard')
+    return redirect('shop:impact_dashboard')
 
 
 

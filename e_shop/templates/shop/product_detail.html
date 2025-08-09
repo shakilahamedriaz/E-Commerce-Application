@@ -1,0 +1,63 @@
+{% extends 'shop/base.html' %}
+{% block title %}{{ product.name }} | E-Shop{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-5">
+    {% if product.image %}<img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">{% else %}
+    <div class="border rounded p-5 text-center text-muted">No Image</div>{% endif %}
+  </div>
+  <div class="col-md-7">
+    <h2 class="fw-bold mb-1">{{ product.name }}</h2>
+    <p class="text-muted mb-2">Category: {{ product.category.name }}</p>
+    <p>{{ product.description|default:'No description provided.' }}</p>
+    <div class="d-flex gap-3 mb-3 flex-wrap">
+      <span class="badge badge-impact">{{ product.effective_carbon_kg }} kg CO₂e</span>
+      <span class="badge bg-success">Ethics {{ product.ethics_score }}/100</span>
+      <span class="badge bg-secondary">Rating {{ product.average_rating|floatformat:1 }}★</span>
+    </div>
+    <h4 class="text-success mb-3">${{ product.price }}</h4>
+    {% if user.is_authenticated %}
+      <a href="{% url 'cart_add' product.id %}" class="btn btn-primary me-2"><i class="fa fa-cart-plus me-1"></i>Add to Cart</a>
+    {% else %}
+      <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">Login to Buy</a>
+    {% endif %}
+    <hr>
+    {% if alternative %}
+    <p class="impact-alt">Greener alternative: <a href="{% url 'product_detail' alternative.slug %}">{{ alternative.name }}</a> ({{ alternative.effective_carbon_kg }} kg CO₂e)</p>
+    {% endif %}
+    {% if ladder.best and ladder.best.id != product.id %}
+    <p class="impact-alt">Best in category: <a href="{% url 'product_detail' ladder.best.slug %}">{{ ladder.best.name }}</a> ({{ ladder.best.effective_carbon_kg }} kg)</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-5">
+  <h5>Related Products</h5>
+  <div class="row g-3">
+    {% for rp in related_products %}
+    <div class="col-6 col-md-3">
+      <div class="card h-100">
+        {% if rp.image %}<img src="{{ rp.image.url }}" class="card-img-top" style="object-fit:cover;height:110px">{% endif %}
+        <div class="card-body p-2">
+          <a class="small fw-semibold d-block" href="{% url 'product_detail' rp.slug %}">{{ rp.name }}</a>
+          <span class="small text-muted">${{ rp.price }}</span>
+        </div>
+      </div>
+    </div>
+    {% empty %}<p class="text-muted">None.</p>{% endfor %}
+  </div>
+</div>
+
+<div class="mt-5">
+  <h5>Your Rating</h5>
+  {% if user.is_authenticated %}
+    <form action="{% url 'rate_product' product.id %}" method="post" class="row g-2 align-items-end">{% csrf_token %}
+      <div class="col-sm-3">{{ rating_form.rating }}</div>
+      <div class="col-sm-6">{{ rating_form.comment }}</div>
+      <div class="col-sm-3 d-grid"><button class="btn btn-success">Save</button></div>
+    </form>
+  {% else %}
+    <p><a href="{% url 'login' %}">Login</a> to rate this product.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem, UserImpact, OrderImpact
 from django.contrib.auth.models import User
 
 # Register your models here.
@@ -21,10 +21,10 @@ class RatingInline(admin.TabularInline):
 # Admin for Product model
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'price', 'stock', 'available', 'created', 'updated')
+    list_display = ('name', 'slug', 'price', 'stock', 'available', 'created', 'updated', 'carbon_footprint_kg', 'ethics_score')
     prepopulated_fields = {'slug': ('name',)}
     list_filter = ['available', 'created', 'updated', 'category']
-    list_editable = ['price', 'stock', 'available']
+    list_editable = ['price', 'stock', 'available', 'carbon_footprint_kg', 'ethics_score']
     inlines = [RatingInline]
 
 
@@ -61,3 +61,15 @@ class OrderAdmin(admin.ModelAdmin):
 class RatingAdmin(admin.ModelAdmin):
     list_display = ('user', 'product', 'rating', 'comment', 'created')
     list_filter = ['rating', 'created']
+
+
+@admin.register(UserImpact)
+class UserImpactAdmin(admin.ModelAdmin):
+    list_display = ('user', 'total_carbon_kg', 'total_saved_kg', 'current_month_carbon_kg', 'month_budget_kg', 'updated_at')
+    search_fields = ('user__username', 'user__email')
+
+
+@admin.register(OrderImpact)
+class OrderImpactAdmin(admin.ModelAdmin):
+    list_display = ('order', 'carbon_kg', 'baseline_kg', 'saved_kg', 'created_at')
+    search_fields = ('order__id', 'order__user__username')

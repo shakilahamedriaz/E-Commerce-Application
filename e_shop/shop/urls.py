@@ -24,4 +24,8 @@ urlpatterns = [
 
     path('profile/', views.profile, name='profile'),
     path('rate/<int:product_id>/', views.rate_product, name='rate_product'),
+    # Impact & sustainability endpoints
+    path('impact/dashboard/', views.impact_dashboard, name='impact_dashboard'),
+    path('impact/budget/set/', views.set_budget, name='set_budget'),
+    path('impact/simulator/', views.what_if_simulator, name='what_if_simulator'),
 ]

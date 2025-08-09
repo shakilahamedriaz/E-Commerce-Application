@@ -1,0 +1,64 @@
+{% extends 'shop/base.html' %}
+{% block title %}Impact Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Impact Dashboard</h2>
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card p-3 h-100">
+      <h6 class="fw-bold mb-3">Summary</h6>
+      {% if impact %}
+        <p class="mb-1 small">Total Carbon: <strong>{{ impact.total_carbon_kg }} kg</strong></p>
+        <p class="mb-1 small">Total Saved: <strong>{{ impact.total_saved_kg }} kg</strong></p>
+        <p class="mb-1 small">This Month: <strong>{{ impact.current_month_carbon_kg }} / {{ impact.month_budget_kg }} kg</strong></p>
+        <p class="mb-2 small">Budget Status: <span class="badge {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning text-dark{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}">{{ budget_status|title }}</span></p>
+      {% else %}
+        <p class="text-muted small">No data yet. Place an order to begin tracking.</p>
+      {% endif %}
+      <hr>
+      <h6 class="fw-bold">Set Budget</h6>
+      <form method="post" action="{% url 'set_budget' %}" class="d-flex gap-2 align-items-end">{% csrf_token %}
+        <div class="flex-grow-1">{{ budget_form.month_budget_kg }}</div>
+        <button class="btn btn-primary btn-sm">Save</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 h-100">
+      <h6 class="fw-bold mb-3">What-If Simulator</h6>
+      <form method="post" action="{% url 'what_if_simulator' %}" class="small">{% csrf_token %}
+        <label class="form-label mt-1">Swap Fraction (0-1)</label>
+        <input type="number" name="swap_fraction" step="0.1" value="0.5" class="form-control form-control-sm">
+        <label class="form-label mt-2">Saving Ratio (0-1)</label>
+        <input type="number" name="saving_ratio" step="0.05" value="0.3" class="form-control form-control-sm">
+        <label class="form-label mt-2">Months</label>
+        <input type="number" name="months" value="3" class="form-control form-control-sm">
+        <button class="btn btn-success btn-sm w-100 mt-3">Run Simulation</button>
+      </form>
+      {% if request.session.simulator_result %}
+        <hr>
+        <h6 class="fw-bold">Result</h6>
+        <ul class="small mb-0">
+          {% for k,v in request.session.simulator_result.items %}
+            <li>{{ k|title }}: {{ v }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card p-3 h-100">
+      <h6 class="fw-bold mb-3">Recent Orders Impact</h6>
+      <div class="table-responsive" style="max-height:260px;">
+        <table class="table table-sm small">
+          <thead><tr><th>ID</th><th>Carbon</th><th>Saved</th></tr></thead>
+          <tbody>
+          {% for oi in recent_impacts %}
+            <tr><td>{{ oi.id }}</td><td>{{ oi.carbon }} kg</td><td>{{ oi.saved }} kg</td></tr>
+          {% empty %}<tr><td colspan="3" class="text-muted">No recent data.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

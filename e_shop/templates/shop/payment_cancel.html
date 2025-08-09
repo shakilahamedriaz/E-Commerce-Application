@@ -1,0 +1,9 @@
+{% extends 'shop/base.html' %}
+{% block title %}Payment Cancelled{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <h2 class="text-warning"><i class="fa fa-exclamation-circle"></i> Payment Cancelled</h2>
+  <p>Your payment was cancelled. You can resume checkout anytime.</p>
+  <a href="{% url 'cart_detail' %}" class="btn btn-primary mt-3">Back to Cart</a>
+</div>
+{% endblock %}

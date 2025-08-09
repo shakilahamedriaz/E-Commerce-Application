@@ -1,0 +1,10 @@
+{% extends 'shop/base.html' %}
+{% block title %}Rate Product{% endblock %}
+{% block content %}
+<h2 class="mb-3">Rate {{ product.name }}</h2>
+<form method="post" class="card p-3 col-md-6">{% csrf_token %}
+  <div class="mb-3">{{ form.rating.label_tag }} {{ form.rating }}</div>
+  <div class="mb-3">{{ form.comment.label_tag }} {{ form.comment }}</div>
+  <div class="d-grid"><button class="btn btn-success">Submit Rating</button></div>
+</form>
+{% endblock %}

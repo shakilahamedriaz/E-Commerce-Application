@@ -1,0 +1,9 @@
+{% extends 'shop/base.html' %}
+{% block title %}Payment Success{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <h2 class="text-success"><i class="fa fa-check-circle"></i> Payment Successful</h2>
+  <p>Your order has been placed. Thank you!</p>
+  <a href="{% url 'impact_dashboard' %}" class="btn btn-primary mt-3">View Impact</a>
+</div>
+{% endblock %}

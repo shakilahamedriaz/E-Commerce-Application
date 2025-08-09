@@ -60,3 +60,13 @@ class CheckoutForm(forms.ModelForm):
             'city': forms.TextInput(attrs={'placeholder': 'City'}),
             'note': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Order Notes...'}),
         }
+
+
+# Budget Form
+class CarbonBudgetForm(forms.Form):
+    month_budget_kg = forms.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        min_value=0,
+        help_text="Set your monthly carbon budget in kg CO₂e"
+    )
