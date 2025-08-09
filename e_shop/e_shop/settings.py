@@ -88,6 +88,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Custom context processors for shop's total cart item count
+                'shop.context_processors.cart_items_count',
             ],
         },
     },
@@ -142,6 +144,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'  # Directory to collect static files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'  # Directory to store uploaded media files
+
 
 #allauth settings
 SITE_ID = 2
@@ -170,7 +176,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'riaz35-995@diu.edu.bd'
-EMAIL_HOST_PASSWORD = 'wdvw jmqc bwmc xdsd'
+EMAIL_HOST_PASSWORD = 'wdvwjqcbwmcxdsd'
 
 
 
@@ -179,4 +185,4 @@ EMAIL_HOST_PASSWORD = 'wdvw jmqc bwmc xdsd'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-wdvw jmqc bwmc xdsd
+
