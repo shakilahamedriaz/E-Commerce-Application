@@ -374,15 +374,16 @@ def impact_dashboard(request):
     status = budget_status(request.user)
     recent_impacts = []
     if ui:
+        # Get recent orders with impact data
+        recent_orders = request.user.orders.filter(impact__isnull=False).select_related('impact').order_by('-created')[:5]
         recent_impacts = [
             {
-                'id': oi.order_id,
-                'carbon': oi.carbon_kg,
-                'saved': oi.saved_kg,
-                'created': oi.created_at,
+                'id': order.id,
+                'carbon': order.impact.carbon_kg,
+                'saved': order.impact.saved_kg,
+                'created': order.impact.created_at,
             }
-            for oi in getattr(request.user, 'orders').all()[:5]
-            if hasattr(oi, 'impact')
+            for order in recent_orders
         ]
     form = CarbonBudgetForm(initial={'month_budget_kg': ui.month_budget_kg if ui else 0})
     return render(request, 'shop/impact_dashboard.html', {

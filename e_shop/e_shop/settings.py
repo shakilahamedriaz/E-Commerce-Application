@@ -170,13 +170,18 @@ SSLCOMMERZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/valida
 
 
 # Email setup
-# email setup
+# For development: Use console backend to see emails in terminal
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# For production with Gmail: Use SMTP backend with App Password
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'riaz35-995@diu.edu.bd'
-EMAIL_HOST_PASSWORD = 'wdvwjqcbwmcxdsd'
+# NOTE: For Gmail, you need an App Password, not your regular password
+# Generate one at: https://myaccount.google.com/apppasswords
+EMAIL_HOST_PASSWORD = 'wdvwjqcbwmcxdsd'  # Replace with App Password for production
+DEFAULT_FROM_EMAIL = 'E-Shop <riaz35-995@diu.edu.bd>'
 
 
 
