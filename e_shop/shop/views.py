@@ -300,9 +300,22 @@ def payment_process(request):
 
 # Payment success view
 @csrf_exempt
-@login_required
 def payment_success(request, order_id):
-    order=get_object_or_404(Order, id=order_id, user=request.user)
+    # Debug session and authentication
+    print(f"🔍 Payment success called for order #{order_id}")
+    print(f"🔍 User authenticated: {request.user.is_authenticated}")
+    print(f"🔍 User: {request.user}")
+    print(f"🔍 Session key: {request.session.session_key}")
+    
+    # Check if user is authenticated, if not try to get order without user filter
+    if not request.user.is_authenticated:
+        print("⚠️ User not authenticated in payment_success, trying to find order without user filter")
+        order = get_object_or_404(Order, id=order_id)
+        # If order exists but user not authenticated, it might be a session issue
+        # Let's continue processing but redirect differently
+    else:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+    
     order.paid = True
     # Align with defined choices ('Processing')
     order.status = 'Processing'
@@ -323,31 +336,86 @@ def payment_success(request, order_id):
         record_order_impact(order)
     except Exception:
         pass
-    send_order_confirmation_email(order)
+    
+    # Send order confirmation email
+    print(f"🔔 Attempting to send order confirmation email for order #{order.id}")
+    email_sent = send_order_confirmation_email(order)
+    if email_sent:
+        print(f"✅ Order confirmation email sent successfully to {order.email}")
+    else:
+        print(f"❌ Failed to send order confirmation email to {order.email}")
+    
     messages.success(request, 'Payment successful! Your order has been placed.')
-    return redirect('shop:profile')
+    
+    # Redirect to order success page instead of profile/login
+    return redirect('shop:order_success', order_id=order.id)
+
+
+
+# Order success page view
+def order_success(request, order_id):
+    """Order success page that works for both authenticated and anonymous users"""
+    print(f"🔍 Order success page called for order #{order_id}")
+    print(f"🔍 User authenticated: {request.user.is_authenticated}")
+    
+    # Try to get order, don't require authentication
+    try:
+        if request.user.is_authenticated:
+            order = get_object_or_404(Order, id=order_id, user=request.user)
+        else:
+            order = get_object_or_404(Order, id=order_id)
+            
+        return render(request, 'shop/order_success.html', {
+            'order_id': order_id,
+            'order': order
+        })
+    except:
+        messages.error(request, 'Order not found.')
+        return redirect('shop:home')
 
 
 
 # Payment fail view
 @csrf_exempt
-@login_required
 def payment_fail(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    print(f"🔍 Payment fail called for order #{order_id}")
+    print(f"🔍 User authenticated: {request.user.is_authenticated}")
+    
+    if request.user.is_authenticated:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+    else:
+        order = get_object_or_404(Order, id=order_id)
+        
     order.status = 'Cancelled'
     order.save()
-    return redirect('shop:checkout')
+    messages.error(request, 'Payment failed. Please try again.')
+    
+    if request.user.is_authenticated:
+        return redirect('shop:checkout')
+    else:
+        return redirect('shop:login')
 
 
 
 # Payment cancel view
 @csrf_exempt
-@login_required
 def payment_cancel(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
+    print(f"🔍 Payment cancel called for order #{order_id}")
+    print(f"🔍 User authenticated: {request.user.is_authenticated}")
+    
+    if request.user.is_authenticated:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+    else:
+        order = get_object_or_404(Order, id=order_id)
+        
     order.status = 'Cancelled'
     order.save()
-    return redirect('shop:cart_detail')
+    messages.info(request, 'Payment was cancelled.')
+    
+    if request.user.is_authenticated:
+        return redirect('shop:cart_detail')
+    else:
+        return redirect('shop:login')
 
 
 # Profile view
@@ -356,7 +424,7 @@ def profile(request):
     tab = request.GET.get('tab')
     orders = Order.objects.filter(user=request.user).order_by('-created')
     completed_orders = orders.filter(status='Delivered').count()
-    total_spent = sum(order.get_total_cost for order in orders if order.paid)
+    total_spent = sum(order.get_total_cost() for order in orders if order.paid)  # Fixed: added ()
     order_history_active = (tab == 'orders')
     return render(request, 'shop/profile.html', {
         'user' : request.user,

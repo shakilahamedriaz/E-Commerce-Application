@@ -38,15 +38,25 @@ def generate_sslcommerz_payment(order, request):
 # Send order confirmation email with HTML content
 def send_order_confirmation_email(order):
     """Send order confirmation email to customer"""
+    print(f"🔔 Starting email send for order #{order.id}")
+    print(f"📧 Recipient: {order.email}")
+    print(f"📧 From: {settings.DEFAULT_FROM_EMAIL}")
+    
     try:
         subject = f"Order Confirmation - Order #{order.id}"
         message = render_to_string('shop/order_confirmation_email.html', {'order': order})
         to = order.email
         from_email = settings.DEFAULT_FROM_EMAIL
         
+        print(f"📧 Subject: {subject}")
+        print(f"📧 Email backend: {settings.EMAIL_BACKEND}")
+        
         send_email = EmailMultiAlternatives(subject, '', from_email, [to])
         send_email.attach_alternative(message, "text/html")
+        
+        print("📧 Attempting to send email...")
         send_email.send()
+        
         print(f"✅ Order confirmation email sent to {to} for order #{order.id}")
         print(f"📧 Email content preview: Order #{order.id}, Total: ${order.get_total_cost()}")
         return True
@@ -54,4 +64,6 @@ def send_order_confirmation_email(order):
         print(f"❌ Failed to send email for order #{order.id}: {str(e)}")
         print(f"📧 Email would have been sent to: {order.email}")
         print(f"💡 Check your email settings and Gmail App Password if using SMTP backend")
+        import traceback
+        traceback.print_exc()
         return False

@@ -1,0 +1,31 @@
+{% extends 'shop/base.html' %}
+{% block title %}Order Successful | E-Shop{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fa fa-check-circle text-success" style="font-size: 4rem;"></i>
+    </div>
+    <h2 class="text-success mb-3">🎉 Order Placed Successfully!</h2>
+    <p class="lead mb-4">Thank you for your purchase. Your order has been confirmed and we'll start processing it right away.</p>
+    
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h5 class="card-title">Order #{{ order_id }}</h5>
+            <p class="card-text">You'll receive an email confirmation shortly with your order details.</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'shop:profile' %}" class="btn btn-primary me-2">View My Orders</a>
+                <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-success">View Impact</a>
+            {% else %}
+                <p class="small text-muted mt-3">
+                    <a href="{% url 'shop:login' %}">Log in</a> to view your order history and impact dashboard.
+                </p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Continue Shopping</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

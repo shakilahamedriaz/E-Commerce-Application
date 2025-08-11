@@ -154,9 +154,15 @@ SITE_ID = 2
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Session settings to maintain login state during payment
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 
@@ -170,17 +176,14 @@ SSLCOMMERZ_VALIDATION_URL = 'https://sandbox.sslcommerz.com/validator/api/valida
 
 
 # Email setup
-# For development: Use console backend to see emails in terminal
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# For production with Gmail: Use SMTP backend with App Password
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Switched to SMTP backend for real email sending
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'riaz35-995@diu.edu.bd'
-# NOTE: For Gmail, you need an App Password, not your regular password
-# Generate one at: https://myaccount.google.com/apppasswords
-EMAIL_HOST_PASSWORD = 'wdvwjqcbwmcxdsd'  # Replace with App Password for production
+# Gmail App Password (16 characters without spaces)
+EMAIL_HOST_PASSWORD = 'nxvfyfvlnemqnwfc'  # Removed spaces from App Password
 DEFAULT_FROM_EMAIL = 'E-Shop <riaz35-995@diu.edu.bd>'
 
 
