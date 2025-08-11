@@ -1,0 +1,204 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-receipt"></i> Order #{{ order.id }}
+                        <span class="badge badge-{{ order.get_status_display_class }} ms-2">{{ order.status }}</span>
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Order Status Timeline -->
+                    <div class="mb-4">
+                        <h5>Order Status</h5>
+                        <div class="timeline">
+                            {% for step in status_timeline %}
+                                <div class="timeline-item {% if step.completed %}completed{% endif %}">
+                                    <div class="timeline-marker">
+                                        {% if step.completed %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        {% else %}
+                                            <i class="far fa-circle text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">{{ step.status }}</h6>
+                                        {% if step.date %}
+                                            <small class="text-muted">{{ step.date|date:"M d, Y H:i" }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Tracking Information -->
+                    {% if order.tracking_number %}
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-truck"></i> Tracking Information</h6>
+                            <p class="mb-1"><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
+                            {% if order.courier_service %}
+                                <p class="mb-1"><strong>Courier:</strong> {{ order.courier_service }}</p>
+                            {% endif %}
+                            {% if order.estimated_delivery %}
+                                <p class="mb-0"><strong>Estimated Delivery:</strong> {{ order.estimated_delivery|date:"M d, Y" }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Order Items -->
+                    <h5>Order Items</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.image %}
+                                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
+                                                         style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ item.product.name }}</h6>
+                                                    <small class="text-muted">{{ item.product.category.name }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>${{ item.price }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.get_cost }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <th colspan="3">Total</th>
+                                    <th>${{ order.get_total_cost }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Delivery Information -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Delivery Information</h5>
+                </div>
+                <div class="card-body">
+                    <address>
+                        <strong>{{ order.first_name }} {{ order.last_name }}</strong><br>
+                        {{ order.address }}<br>
+                        {{ order.city }}, {{ order.postal_code }}<br>
+                        <abbr title="Email">E:</abbr> {{ order.email }}
+                    </address>
+                </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Order Date:</dt>
+                        <dd class="col-sm-6">{{ order.created|date:"M d, Y" }}</dd>
+                        
+                        <dt class="col-sm-6">Payment Status:</dt>
+                        <dd class="col-sm-6">
+                            {% if order.paid %}
+                                <span class="badge badge-success">Paid</span>
+                            {% else %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% endif %}
+                        </dd>
+                        
+                        {% if order.transaction_id %}
+                            <dt class="col-sm-6">Transaction ID:</dt>
+                            <dd class="col-sm-6">{{ order.transaction_id }}</dd>
+                        {% endif %}
+                    </dl>
+
+                    {% if order.note %}
+                        <hr>
+                        <h6>Order Notes:</h6>
+                        <p class="text-muted">{{ order.note }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    {% if order.status == 'Delivered' %}
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-block">
+                            <i class="fas fa-shopping-bag"></i> Shop Again
+                        </a>
+                    {% elif order.status == 'Pending' and not order.paid %}
+                        <a href="{% url 'shop:payment_process' %}" class="btn btn-primary btn-block">
+                            <i class="fas fa-credit-card"></i> Complete Payment
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'shop:profile' %}" class="btn btn-outline-secondary mt-2">
+                        <i class="fas fa-arrow-left"></i> Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+}
+
+.timeline-content {
+    padding-left: 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: #dee2e6;
+}
+</style>
+{% endblock %}

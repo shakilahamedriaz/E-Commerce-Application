@@ -1,0 +1,229 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Search Products | E-Shop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Search Filters -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{% url 'shop:product_search' %}">
+                        <!-- Search Query -->
+                        <div class="mb-3">
+                            <label for="{{ form.query.id_for_label }}" class="form-label">Search</label>
+                            {{ form.query }}
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    {{ form.min_price }}
+                                </div>
+                                <div class="col-6">
+                                    {{ form.max_price }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <label for="{{ form.min_rating.id_for_label }}" class="form-label">Minimum Rating</label>
+                            {{ form.min_rating }}
+                        </div>
+
+                        <!-- Stock Status -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.in_stock_only }}
+                                <label class="form-check-label" for="{{ form.in_stock_only.id_for_label }}">
+                                    In Stock Only
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div class="mb-3">
+                            <label for="{{ form.sort_by.id_for_label }}" class="form-label">Sort By</label>
+                            {{ form.sort_by }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <a href="{% url 'shop:product_search' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Categories (could be added here) -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-tags"></i> Categories</h6>
+                </div>
+                <div class="card-body">
+                    {% for category in categories %}
+                        <a href="{% url 'shop:product_list_by_category' category.slug %}" 
+                           class="d-block text-decoration-none mb-1">{{ category.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <!-- Search Results Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>
+                    Search Results
+                    {% if total_results %}
+                        <span class="text-muted">({{ total_results }} product{{ total_results|pluralize }})</span>
+                    {% endif %}
+                </h4>
+                
+                <!-- View toggle could go here -->
+            </div>
+
+            <!-- Products Grid -->
+            {% if products %}
+                <div class="row g-4">
+                    {% for product in products %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" 
+                                         style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                         style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title">
+                                        <a href="{% url 'shop:product_detail' product.slug %}" 
+                                           class="text-decoration-none">{{ product.name }}</a>
+                                    </h6>
+                                    
+                                    <p class="card-text text-muted small">{{ product.description|truncatewords:10 }}</p>
+                                    
+                                    <!-- Product badges -->
+                                    <div class="mb-2">
+                                        {% if product.avg_rating %}
+                                            <span class="badge bg-warning text-dark">
+                                                {{ product.avg_rating|floatformat:1 }}★ 
+                                                ({{ product.review_count }})
+                                            </span>
+                                        {% endif %}
+                                        
+                                        {% if product.stock <= 5 and product.stock > 0 %}
+                                            <span class="badge bg-warning">Low Stock</span>
+                                        {% elif product.stock == 0 %}
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="h6 text-success mb-0">${{ product.price }}</span>
+                                            <small class="text-muted">{{ product.category.name }}</small>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            {% if product.stock > 0 %}
+                                                {% if user.is_authenticated %}
+                                                    <form method="post" action="{% url 'shop:cart_add' product.id %}" class="flex-fill">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <a href="{% url 'shop:login' %}" class="btn btn-primary btn-sm flex-fill">
+                                                        Login to Buy
+                                                    </a>
+                                                {% endif %}
+                                            {% else %}
+                                                <button class="btn btn-secondary btn-sm flex-fill" disabled>
+                                                    Out of Stock
+                                                </button>
+                                            {% endif %}
+
+                                            {% if user.is_authenticated %}
+                                                <form method="post" action="{% url 'shop:wishlist_add' product.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Add to wishlist">
+                                                        <i class="far fa-heart"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                    <nav aria-label="Search results pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if products.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ products.previous_page_number }}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for page_num in products.paginator.page_range %}
+                                {% if page_num == products.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% elif page_num > products.number|add:'-3' and page_num < products.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_num }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if products.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ products.next_page_number }}">
+                                        Next
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-5x text-muted mb-3"></i>
+                    <h5 class="text-muted">No products found</h5>
+                    <p class="text-muted">Try adjusting your search criteria or browse our categories.</p>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag"></i> Browse All Products
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

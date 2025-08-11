@@ -55,12 +55,34 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
+    def get_absolute_url(self):
+        """Get URL for product detail page"""
+        from django.urls import reverse
+        return reverse('shop:product_detail', kwargs={'slug': self.slug})
+    
     def average_rating(self):
-        ratings = self.ratings.all() # Get all ratings for this product
-        # Calculate the average rating
+        """Calculate average rating from reviews"""
+        reviews = self.reviews.all()
+        if reviews.count() > 0:
+            return sum([review.rating for review in reviews]) / reviews.count()
+        
+        # Fallback to old ratings system if no reviews
+        ratings = self.ratings.all()
         if ratings.count() > 0:
             return sum([rating.rating for rating in ratings]) / ratings.count()
-        return 0 # If no ratings, return 0
+        return 0
+    
+    def get_review_count(self):
+        """Get total number of reviews"""
+        return self.reviews.count()
+    
+    def is_in_stock(self):
+        """Check if product is in stock"""
+        return self.stock > 0
+    
+    def can_add_to_cart(self, quantity=1):
+        """Check if quantity can be added to cart"""
+        return self.available and self.stock >= quantity
     
     # Sustainability helper: effective carbon (product value or category fallback)
     def effective_carbon_kg(self):
@@ -103,6 +125,10 @@ class Cart(models.Model):
     
     def get_total_item(self):
         return sum(item.quantity for item in self.items.all())
+    
+    def get_total_items_count(self):
+        """Get total number of items in cart"""
+        return sum(item.quantity for item in self.items.all())
 
 
 
@@ -128,8 +154,10 @@ class Order(models.Model):
         ('Pending', 'Pending'),
         ('Processing', 'Processing'),
         ('Shipped', 'Shipped'),
+        ('Out for Delivery', 'Out for Delivery'),
         ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
+        ('Returned', 'Returned'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     first_name = models.CharField(max_length=100)
@@ -143,7 +171,14 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     note = models.TextField(blank=True)
     paid = models.BooleanField(default=False)
-    transaction_id = models.CharField(max_length=100, blank=True, null=True) 
+    transaction_id = models.CharField(max_length=100, blank=True, null=True)
+    
+    # Enhanced tracking fields
+    tracking_number = models.CharField(max_length=100, blank=True, null=True)
+    estimated_delivery = models.DateTimeField(null=True, blank=True)
+    shipped_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    courier_service = models.CharField(max_length=100, blank=True, help_text="e.g., DHL, FedEx, UPS")
 
 
     class Meta:
@@ -154,6 +189,19 @@ class Order(models.Model):
     
     def get_total_cost(self):
         return sum(item.get_cost() for item in self.items.all())
+        
+    def get_status_display_class(self):
+        """Return CSS class for status display"""
+        status_classes = {
+            'Pending': 'warning',
+            'Processing': 'info',
+            'Shipped': 'primary',
+            'Out for Delivery': 'info',
+            'Delivered': 'success',
+            'Cancelled': 'danger',
+            'Returned': 'secondary',
+        }
+        return status_classes.get(self.status, 'secondary')
 
 
 # Order Items for products in the order
@@ -204,6 +252,17 @@ class Badge(models.Model):
     condition_type = models.CharField(max_length=50, help_text="Metric key, e.g. TOTAL_SAVED, STREAK, FIRST_ORDER")
     threshold = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Enhanced badge features
+    BADGE_CATEGORIES = [
+        ('CARBON', 'Carbon Reduction'),
+        ('GENERAL', 'General Achievement'),
+        ('STREAK', 'Streak Achievement'),
+        ('MILESTONE', 'Milestone Achievement'),
+    ]
+    category = models.CharField(max_length=20, choices=BADGE_CATEGORIES, default='GENERAL')
+    icon = models.CharField(max_length=50, default='🌱')  # Emoji or CSS class
+    popup_message = models.TextField(blank=True)  # Custom popup message
 
     def __str__(self):
         return self.name
@@ -219,3 +278,90 @@ class UserBadge(models.Model):
 
     def __str__(self):
         return f"{self.user} -> {self.badge.code}"
+
+
+# ================ Carbon Intelligence Features ================ #
+
+class EnvironmentalImpact(models.Model):
+    """Conversion factors for environmental impact visualization"""
+    metric_name = models.CharField(max_length=100, unique=True)
+    co2_per_unit = models.DecimalField(max_digits=10, decimal_places=4)  # kg CO2 per unit
+    unit_label = models.CharField(max_length=50)  # e.g., "trees", "miles", "lightbulbs"
+    description = models.TextField()
+    icon = models.CharField(max_length=10, default='🌳')
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.metric_name} ({self.unit_label})"
+
+
+# ---------------- Phase 3: Advanced Features ---------------- #
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wishlist_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlisted_by')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+
+
+class StockAlert(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='stock_alerts')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock_alerts')
+    threshold = models.PositiveIntegerField(default=5, help_text="Alert when stock falls below this number")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')
+
+    def __str__(self):
+        return f"Alert for {self.user.username} - {self.product.name} (threshold: {self.threshold})"
+
+
+class UserNotification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('stock_alert', 'Stock Alert'),
+        ('order_update', 'Order Update'),
+        ('new_product', 'New Product'),
+        ('price_drop', 'Price Drop'),
+        ('sustainability', 'Sustainability Achievement'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    related_product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
+    related_order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    is_verified_purchase = models.BooleanField(default=False)
+    helpful_votes = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('product', 'user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} ({self.rating}★)"

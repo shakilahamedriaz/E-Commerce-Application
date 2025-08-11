@@ -1,77 +1,358 @@
 {% extends 'shop/base.html' %}
 {% block title %}Impact Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .impact-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+  }
+  .equivalent-item {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+  }
+  .progress-ring {
+    transform: rotate(-90deg);
+  }
+  .badge-earned {
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Impact Dashboard</h2>
-<div class="row g-4">
-  <div class="col-md-4">
-    <div class="card p-3 h-100">
-      <h6 class="fw-bold mb-3">Summary</h6>
-      {% if impact %}
-        <p class="mb-1 small">Total Carbon: <strong>{{ impact.total_carbon_kg }} kg</strong></p>
-        <p class="mb-1 small">Total Saved: <strong>{{ impact.total_saved_kg }} kg</strong></p>
-        <p class="mb-1 small">This Month: <strong>{{ impact.current_month_carbon_kg }} / {{ impact.month_budget_kg }} kg</strong></p>
-        <p class="mb-2 small">Budget Status: <span class="badge {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning text-dark{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}">{{ budget_status|title }}</span></p>
-      {% else %}
-        <p class="text-muted small">No data yet. Place an order to begin tracking.</p>
-      {% endif %}
-      <hr>
-      <h6 class="fw-bold">Set Budget</h6>
-  <form method="post" action="{% url 'shop:set_budget' %}" class="d-flex gap-2 align-items-end">{% csrf_token %}
-        <div class="flex-grow-1">{{ budget_form.month_budget_kg }}</div>
-        <button class="btn btn-primary btn-sm">Save</button>
-      </form>
-    </div>
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">🌱 Your Environmental Impact Dashboard</h2>
+    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#simulatorModal">
+      <i class="fas fa-seedling"></i> Impact Simulator
+    </button>
   </div>
-  <div class="col-md-4">
-    <div class="card p-3 h-100">
-      <h6 class="fw-bold mb-3">What-If Simulator</h6>
-  <form method="post" action="{% url 'shop:what_if_simulator' %}" class="small">{% csrf_token %}
-        <label class="form-label mt-1">Swap Fraction (0-1)</label>
-        <input type="number" name="swap_fraction" step="0.1" value="0.5" class="form-control form-control-sm">
-        <label class="form-label mt-2">Saving Ratio (0-1)</label>
-        <input type="number" name="saving_ratio" step="0.05" value="0.3" class="form-control form-control-sm">
-        <label class="form-label mt-2">Months</label>
-        <input type="number" name="months" value="3" class="form-control form-control-sm">
-        <button class="btn btn-success btn-sm w-100 mt-3">Run Simulation</button>
-      </form>
-      {% if request.session.simulator_result %}
-        <hr>
-        <h6 class="fw-bold">Result</h6>
-        <ul class="small mb-0">
-          {% for k,v in request.session.simulator_result.items %}
-            <li>{{ k|title }}: {{ v }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card p-3 h-100">
-      <h6 class="fw-bold mb-3">Recent Orders Impact</h6>
-      <div class="table-responsive" style="max-height:260px;">
-        <table class="table table-sm small">
-          <thead><tr><th>ID</th><th>Carbon</th><th>Saved</th></tr></thead>
-          <tbody>
-          {% for oi in recent_impacts %}
-            <tr><td>{{ oi.id }}</td><td>{{ oi.carbon }} kg</td><td>{{ oi.saved }} kg</td></tr>
-          {% empty %}<tr><td colspan="3" class="text-muted">No recent data.</td></tr>{% endfor %}
-          </tbody>
-        </table>
+
+  <!-- Environmental Impact Story -->
+  {% if impact_story %}
+  <div class="card impact-card mb-4">
+    <div class="card-body text-center py-5">
+      <h3 class="card-title">{{ impact_story.story }}</h3>
+      
+      {% if impact_story.equivalents %}
+      <div class="row g-3 mt-4">
+        {% for equiv in impact_story.equivalents|slice:":4" %}
+        <div class="col-md-3 col-6">
+          <div class="equivalent-item">
+            <div class="h1 mb-2">{{ equiv.icon }}</div>
+            <div class="h4 mb-1">{{ equiv.value }}</div>
+            <div class="small opacity-75">{{ equiv.unit }}</div>
+            <div class="small opacity-50">{{ equiv.metric }}</div>
+          </div>
+        </div>
+        {% endfor %}
       </div>
-      <hr>
-      <h6 class="fw-bold mb-2">Badges</h6>
-      <div class="d-flex flex-wrap gap-2">
-        {% with user.badges.all as mybadges %}
-          {% if mybadges %}
-            {% for ub in mybadges %}
-              <span class="badge badge-impact" title="{{ ub.badge.description }}">{{ ub.badge.name }}</span>
-            {% endfor %}
+      {% endif %}
+      
+      <!-- Progress to next milestone -->
+      <div class="mt-4">
+        <p class="mb-2">Progress to next milestone ({{ impact_story.next_milestone }}kg CO₂ saved)</p>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-warning" style="width: {{ impact_story.progress_to_next }}%"></div>
+        </div>
+        <small class="opacity-75">{{ impact_story.progress_to_next|floatformat:1 }}% complete</small>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <!-- Summary Card -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h6 class="mb-0"><i class="fas fa-chart-line"></i> Impact Summary</h6>
+        </div>
+        <div class="card-body">
+          {% if impact %}
+            <div class="row g-3">
+              <div class="col-6 text-center">
+                <div class="h4 text-danger">{{ impact.total_carbon_kg }}</div>
+                <small class="text-muted">Total Carbon (kg)</small>
+              </div>
+              <div class="col-6 text-center">
+                <div class="h4 text-success">{{ impact.total_saved_kg }}</div>
+                <small class="text-muted">Total Saved (kg)</small>
+              </div>
+              <div class="col-12">
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <span>This Month:</span>
+                  <span class="badge {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning text-dark{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}">
+                    {{ impact.current_month_carbon_kg }}/{{ impact.month_budget_kg }}kg
+                  </span>
+                </div>
+              </div>
+            </div>
           {% else %}
-            <span class="text-muted small">No badges yet.</span>
+            <div class="text-center text-muted">
+              <i class="fas fa-seedling fa-3x mb-3"></i>
+              <p>Start your environmental journey by making your first eco-friendly purchase!</p>
+            </div>
           {% endif %}
-        {% endwith %}
+          
+          <hr>
+          <h6 class="fw-bold">Set Monthly Budget</h6>
+          <form method="post" action="{% url 'shop:set_budget' %}" class="d-flex gap-2">
+            {% csrf_token %}
+            {{ budget_form.month_budget_kg }}
+            <button class="btn btn-primary btn-sm">Save</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badges Card -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-warning text-dark">
+          <h6 class="mb-0"><i class="fas fa-medal"></i> Your Achievements</h6>
+        </div>
+        <div class="card-body">
+          {% if user_badges %}
+            <div class="row g-2">
+              {% for ub in user_badges %}
+              <div class="col-6">
+                <div class="badge-earned badge bg-success p-2 w-100 text-center">
+                  <div>{{ ub.badge.icon|default:"🏆" }}</div>
+                  <small>{{ ub.badge.name }}</small>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center text-muted">
+              <i class="fas fa-trophy fa-3x mb-3"></i>
+              <p>Start earning badges by making eco-friendly choices!</p>
+              <small>Available badges: Tree Planter, Eco Warrior, Carbon Hero</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-info text-white">
+          <h6 class="mb-0"><i class="fas fa-history"></i> Recent Impact</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive" style="max-height: 200px;">
+            <table class="table table-sm">
+              <thead>
+                <tr><th>Order</th><th>Carbon</th><th>Saved</th></tr>
+              </thead>
+              <tbody>
+                {% for oi in recent_impacts %}
+                <tr>
+                  <td>#{{ oi.id }}</td>
+                  <td>{{ oi.carbon }}kg</td>
+                  <td class="text-success">+{{ oi.saved }}kg</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center text-muted">No recent orders</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legacy What-If Simulator -->
+  <div class="card mt-4">
+    <div class="card-header bg-secondary text-white">
+      <h6 class="mb-0"><i class="fas fa-calculator"></i> Legacy Carbon Simulator</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <form method="post" action="{% url 'shop:what_if_simulator' %}">
+            {% csrf_token %}
+            <div class="row g-2">
+              <div class="col-4">
+                <label class="form-label small">Swap Fraction</label>
+                <input type="number" name="swap_fraction" step="0.1" value="0.5" class="form-control form-control-sm">
+              </div>
+              <div class="col-4">
+                <label class="form-label small">Saving Ratio</label>
+                <input type="number" name="saving_ratio" step="0.05" value="0.3" class="form-control form-control-sm">
+              </div>
+              <div class="col-4">
+                <label class="form-label small">Months</label>
+                <input type="number" name="months" value="3" class="form-control form-control-sm">
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm mt-2">Run Simulation</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          {% if request.session.simulator_result %}
+          <h6 class="small">Result:</h6>
+          <ul class="small mb-0">
+            {% for k,v in request.session.simulator_result.items %}
+            <li>{{ k|title }}: {{ v }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Environmental Impact Simulator Modal -->
+<div class="modal fade" id="simulatorModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="fas fa-seedling"></i> Environmental Impact Simulator</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="lead">Discover the environmental impact of your future choices!</p>
+        
+        <form id="simulatorForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Monthly Carbon Reduction (kg)</label>
+              <input type="number" id="monthlyReduction" class="form-control" value="5.0" step="0.5" min="0">
+              <div class="form-text">How much CO₂ you plan to save each month</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Time Period (months)</label>
+              <select id="timeframe" class="form-select">
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="12" selected>1 year</option>
+                <option value="24">2 years</option>
+                <option value="60">5 years</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success w-100 mt-3">
+            <i class="fas fa-magic"></i> Simulate Environmental Impact
+          </button>
+        </form>
+
+        <div id="simulationResults" class="mt-4" style="display: none;">
+          <hr>
+          <h6 class="text-success">🌍 Your Future Environmental Impact</h6>
+          <div id="resultsContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('simulatorForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const monthlyReduction = document.getElementById('monthlyReduction').value;
+  const timeframe = document.getElementById('timeframe').value;
+  
+  try {
+    const response = await fetch('{% url "shop:environmental_simulator" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: `monthly_reduction=${monthlyReduction}&timeframe=${timeframe}`
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      displaySimulationResults(data.simulation);
+    } else {
+      alert('Simulation failed: ' + data.error);
+    }
+  } catch (error) {
+    alert('Error running simulation');
+  }
+});
+
+function displaySimulationResults(simulation) {
+  const resultsDiv = document.getElementById('resultsContent');
+  
+  let html = `
+    <div class="row g-3">
+      <div class="col-md-4 text-center">
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="h4 text-success">${simulation.annual_savings}kg</div>
+            <small class="text-muted">Annual CO₂ Savings</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="h4 text-info">${simulation.total_savings}kg</div>
+            <small class="text-muted">Total over ${simulation.timeframe} months</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="h4 text-primary">${simulation.monthly_reduction}kg</div>
+            <small class="text-muted">Per Month</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  if (simulation.equivalents && simulation.equivalents.length > 0) {
+    html += `
+      <div class="mt-4">
+        <h6 class="text-success">🌱 That's equivalent to:</h6>
+        <div class="row g-2">
+    `;
+    
+    simulation.equivalents.forEach(equiv => {
+      html += `
+        <div class="col-md-3 col-6 text-center">
+          <div class="border rounded p-2">
+            <div class="h3">${equiv.icon}</div>
+            <div class="fw-bold">${equiv.value}</div>
+            <div class="small text-muted">${equiv.unit}</div>
+            <div class="small">${equiv.metric}</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  }
+  
+  resultsDiv.innerHTML = html;
+  document.getElementById('simulationResults').style.display = 'block';
+}
+</script>
 {% endblock %}

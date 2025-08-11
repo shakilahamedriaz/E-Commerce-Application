@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Rating, Order
+from .models import Rating, Order, ProductReview, StockAlert
 
 
 
@@ -69,4 +69,98 @@ class CarbonBudgetForm(forms.Form):
         decimal_places=2,
         min_value=0,
         help_text="Set your monthly carbon budget in kg CO₂e"
+    )
+
+
+# ------------------- Phase 3 Forms ------------------- #
+
+# Product Review Form
+class ProductReviewForm(forms.ModelForm):
+    class Meta:
+        model = ProductReview
+        fields = ['title', 'content', 'rating']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'Review title',
+                'class': 'form-control'
+            }),
+            'content': forms.Textarea(attrs={
+                'rows': 5, 
+                'placeholder': 'Share your experience with this product...',
+                'class': 'form-control'
+            }),
+            'rating': forms.Select(
+                choices=[(i, f"{i} Star{'s' if i != 1 else ''}") for i in range(1, 6)],
+                attrs={'class': 'form-control'}
+            ),
+        }
+
+
+# Stock Alert Form
+class StockAlertForm(forms.ModelForm):
+    class Meta:
+        model = StockAlert
+        fields = ['threshold']
+        widgets = {
+            'threshold': forms.NumberInput(attrs={
+                'placeholder': 'Alert when stock falls below',
+                'class': 'form-control',
+                'min': 1,
+                'value': 5
+            }),
+        }
+
+
+# Advanced Search Form
+class AdvancedSearchForm(forms.Form):
+    query = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Search products...',
+            'class': 'form-control'
+        })
+    )
+    min_price = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'Min price',
+            'class': 'form-control',
+            'step': '0.01'
+        })
+    )
+    max_price = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'Max price',
+            'class': 'form-control',
+            'step': '0.01'
+        })
+    )
+    min_rating = forms.ChoiceField(
+        choices=[('', 'Any Rating')] + [(i, f"{i}+ Stars") for i in range(1, 6)],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    in_stock_only = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    sort_by = forms.ChoiceField(
+        choices=[
+            ('', 'Default'),
+            ('name', 'Name A-Z'),
+            ('-name', 'Name Z-A'),
+            ('price', 'Price Low-High'),
+            ('-price', 'Price High-Low'),
+            ('-created', 'Newest First'),
+            ('created', 'Oldest First'),
+            ('-avg_rating', 'Highest Rated'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
     )

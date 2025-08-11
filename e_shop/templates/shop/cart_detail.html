@@ -5,13 +5,18 @@
 {% if cart.items.all %}
 <table class="table table-sm align-middle">
   <thead class="table-light">
-    <tr><th>Product</th><th class="text-center">Qty</th><th>Price</th><th>Footprint</th><th>Alternative</th><th></th></tr>
+    <tr><th>Product</th><th class="text-center">Qty</th><th>Price</th><th>Footprint</th><th>Alternative</th><th>Actions</th></tr>
   </thead>
   <tbody>
   {% for row in items_with_alt %}
     <tr>
-  <td><a href="{% url 'shop:product_detail' row.item.product.slug %}">{{ row.item.product.name }}</a></td>
-      <td class="text-center">{{ row.item.quantity }}</td>
+      <td><a href="{% url 'shop:product_detail' row.item.product.slug %}">{{ row.item.product.name }}</a></td>
+      <td class="text-center">
+        <form method="post" action="{% url 'shop:cart_update' row.item.product.id %}" class="d-inline">
+          {% csrf_token %}
+          <input type="number" name="quantity" value="{{ row.item.quantity }}" min="0" max="{{ row.item.product.stock }}" class="form-control form-control-sm d-inline-block" style="width: 70px;" onchange="this.form.submit()">
+        </form>
+      </td>
       <td>${{ row.item.get_cost }}</td>
       <td>{{ row.line_footprint }} kg</td>
       <td>
@@ -20,7 +25,14 @@
           {% if row.potential_save > 0 %}<div class="small text-success">Save {{ row.potential_save }} kg</div>{% endif %}
         {% else %}-{% endif %}
       </td>
-  <td><a class="btn btn-sm btn-outline-danger" href="{% url 'shop:cart_remove' row.item.product.id %}"><i class="fa fa-times"></i></a></td>
+      <td>
+        <form method="post" action="{% url 'shop:cart_remove' row.item.product.id %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this item from cart?')">
+            <i class="fa fa-times"></i>
+          </button>
+        </form>
+      </td>
     </tr>
   {% endfor %}
   </tbody>

@@ -1,0 +1,167 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}My Stock Alerts | E-Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2 class="mb-4">
+                <i class="fas fa-bell text-warning"></i> My Stock Alerts
+                <span class="badge badge-secondary ms-2">{{ alerts.count }} active alert{{ alerts.count|pluralize }}</span>
+            </h2>
+
+            {% if alerts %}
+                <div class="row">
+                    {% for alert in alerts %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                {% if alert.product.image %}
+                                    <img src="{{ alert.product.image.url }}" class="card-img-top" alt="{{ alert.product.name }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">
+                                        <a href="{% url 'shop:product_detail' alert.product.slug %}" class="text-decoration-none">
+                                            {{ alert.product.name }}
+                                        </a>
+                                    </h5>
+                                    
+                                    <p class="card-text text-muted">{{ alert.product.description|truncatewords:15 }}</p>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="h5 text-primary mb-0">${{ alert.product.price }}</span>
+                                            
+                                            {% if alert.product.stock > alert.threshold %}
+                                                <span class="badge badge-success">
+                                                    In Stock ({{ alert.product.stock }})
+                                                </span>
+                                            {% elif alert.product.stock > 0 %}
+                                                <span class="badge badge-warning">
+                                                    Low Stock ({{ alert.product.stock }})
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Out of Stock</span>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="alert alert-info small mb-3">
+                                            <i class="fas fa-bell"></i> 
+                                            Alert when stock ≤ <strong>{{ alert.threshold }}</strong>
+                                            <br>
+                                            <small class="text-muted">Created {{ alert.created_at|date:"M d, Y" }}</small>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            {% if alert.product.stock > 0 %}
+                                                <form method="post" action="{% url 'shop:cart_add' alert.product.id %}" class="flex-fill">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="quantity" value="1">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <button class="btn btn-secondary btn-sm flex-fill" disabled>
+                                                    <i class="fas fa-times"></i> Out of Stock
+                                                </button>
+                                            {% endif %}
+
+                                            <form method="post" action="{% url 'shop:stock_alert_remove' alert.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                        title="Remove alert"
+                                                        onclick="return confirm('Remove this stock alert?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Info Box -->
+                <div class="alert alert-info mt-4">
+                    <h6><i class="fas fa-info-circle"></i> How Stock Alerts Work</h6>
+                    <ul class="mb-0">
+                        <li>You'll receive notifications when product stock falls below your threshold</li>
+                        <li>Alerts are checked automatically when stock levels change</li>
+                        <li>You can set different thresholds for different products</li>
+                        <li>Remove alerts you no longer need to keep your list organized</li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-5x text-muted mb-3"></i>
+                    <h4 class="text-muted">No active stock alerts</h4>
+                    <p class="text-muted mb-4">
+                        Set up stock alerts on product pages to get notified when items are running low or back in stock!
+                    </p>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag"></i> Browse Products
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Need Something Specific?</h6>
+                            <p class="card-text small text-muted">Use our advanced search to find products and set alerts.</p>
+                            <a href="{% url 'shop:product_search' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-search"></i> Advanced Search
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">Check Your Wishlist</h6>
+                            <p class="card-text small text-muted">Items in your wishlist might be on sale or back in stock.</p>
+                            <a href="{% url 'shop:wishlist' %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-heart"></i> View Wishlist
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge {
+    font-size: 0.75rem;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #bbdefb;
+    color: #0d47a1;
+}
+
+.card-img-top {
+    transition: transform 0.2s;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.02);
+}
+
+.btn-group-sm > .btn, .btn-sm {
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

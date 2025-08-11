@@ -21,6 +21,53 @@
         .table > :not(caption) > * > * { background: var(--white); }
         .progress-bar { background: var(--green); }
         .link-muted { color:#4f6650; }
+        
+        /* Carbon Intelligence Styles */
+        .carbon-badge {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .carbon-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .carbon-badge .badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Environmental equivalents styling */
+        .equivalent-item {
+            transition: transform 0.2s ease;
+        }
+        .equivalent-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Impact card gradient */
+        .impact-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        /* Badge animations */
+        .badge-earned {
+            animation: slideInUp 0.5s ease-out;
+        }
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -34,19 +81,62 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_list' %}">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_search' %}"><i class="fa fa-search"></i> Search</a></li>
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'shop:cart_detail' %}"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:impact_dashboard' %}">Impact</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:profile' %}">Profile</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:wishlist' %}"><i class="fa fa-heart"></i> Wishlist</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fa fa-bell"></i> Notifications
+                                <span id="notification-count" class="badge bg-danger" style="display: none;">0</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'shop:notifications' %}">View All Notifications</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:stock_alerts_list' %}">Stock Alerts</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="impactDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fa fa-leaf"></i> Impact
+                                {% if user.impact_summary.total_saved_kg %}
+                                <span class="badge bg-success">{{ user.impact_summary.total_saved_kg|floatformat:1 }}kg</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'shop:impact_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="dropdown-item-text">
+                                    <small class="text-muted">
+                                        {% if user.impact_summary %}
+                                            🌱 Saved: {{ user.impact_summary.total_saved_kg|default:0 }}kg CO₂<br>
+                                            📊 Total: {{ user.impact_summary.total_carbon_kg|default:0 }}kg CO₂
+                                        {% else %}
+                                            Start your eco journey!
+                                        {% endif %}
+                                    </small>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:impact_dashboard' %}">
+                                    <i class="fas fa-seedling"></i> View Full Impact
+                                </a></li>
+                            </ul>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fa fa-user"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'shop:profile' %}">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
                     {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
                     </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'shop:logout' %}">Logout ({{ user.username }})</a>
-                        </li>
-                    {% else %}
+                    {% if not user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'shop:login' %}">Login</a>
                         </li>
@@ -85,5 +175,31 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% if user.is_authenticated %}
+    <script>
+        // Live notification count update
+        function updateNotificationCount() {
+            fetch('{% url "shop:notifications_count" %}')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-count');
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.log('Error fetching notification count:', error));
+        }
+
+        // Update notification count on page load and every 30 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCount();
+            setInterval(updateNotificationCount, 30000);
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
