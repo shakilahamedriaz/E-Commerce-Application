@@ -1,0 +1,373 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load admin_extras %}
+
+{% block extrahead %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    /* Modern Admin Dashboard Styles */
+    .dashboard-container {
+        padding: 20px;
+        background: #f8f9fa;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 5px solid;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card.orders { border-left-color: #2196f3; }
+    .stat-card.products { border-left-color: #ff9800; }
+    .stat-card.sustainability { border-left-color: #4caf50; }
+    .stat-card.users { border-left-color: #9c27b0; }
+    
+    .stat-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 5px;
+        background: linear-gradient(45deg, #2e7d32, #4caf50);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stat-change {
+        font-size: 0.8em;
+        margin-top: 10px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    .stat-change.positive {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .stat-change.negative {
+        background: #ffebee;
+        color: #c62828;
+    }
+    
+    .charts-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .chart-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-btn {
+        background: white;
+        border: 2px solid #e0e0e0;
+        padding: 20px;
+        border-radius: 15px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn:hover {
+        border-color: #4caf50;
+        transform: translateY(-3px);
+        color: #4caf50;
+        text-decoration: none;
+    }
+    
+    .action-icon {
+        font-size: 2em;
+        margin-bottom: 10px;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 1.2em;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-message {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .activity-time {
+        color: #999;
+        font-size: 0.85em;
+    }
+    
+    .activity-value {
+        color: #4caf50;
+        font-weight: bold;
+    }
+    
+    .low-stock-alert {
+        background: #fff3e0;
+        border: 1px solid #ffb74d;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .sustainability-highlight {
+        background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .highlight-title {
+        font-size: 1.5em;
+        color: #2e7d32;
+        margin-bottom: 10px;
+    }
+    
+    .highlight-value {
+        font-size: 3em;
+        font-weight: bold;
+        color: #4caf50;
+        margin-bottom: 10px;
+    }
+    
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-header {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 style="margin: 0; font-size: 2.5em;">🌱 EcoCommerce Dashboard</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Sustainable E-commerce Management Portal</p>
+        <small style="opacity: 0.7;">Last updated: {{ dashboard_date|date:"F d, Y" }}</small>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="stats-grid">
+        <!-- Orders Stats -->
+        <div class="stat-card orders">
+            <div class="stat-value">{{ order_stats.total_orders_30d }}</div>
+            <div class="stat-label">📦 Orders (30 days)</div>
+            <div class="stat-change positive">+{{ order_stats.paid_orders_30d }} paid</div>
+            <div style="margin-top: 10px;">
+                <small>💰 Revenue: ${{ order_stats.total_revenue_30d|floatformat:0 }}</small><br>
+                <small>📊 Avg: ${{ order_stats.avg_order_value|floatformat:2 }}</small>
+            </div>
+        </div>
+
+        <!-- Products Stats -->
+        <div class="stat-card products">
+            <div class="stat-value">{{ product_stats.total_products }}</div>
+            <div class="stat-label">🛍️ Active Products</div>
+            <div class="stat-change {% if product_stats.low_stock_products > 0 %}negative{% else %}positive{% endif %}">
+                {{ product_stats.low_stock_products }} low stock
+            </div>
+            <div style="margin-top: 10px;">
+                <small>🌱 Green: {{ product_stats.green_products }}</small><br>
+                <small>❌ Out of stock: {{ product_stats.out_of_stock }}</small>
+            </div>
+        </div>
+
+        <!-- Sustainability Stats -->
+        <div class="stat-card sustainability">
+            <div class="stat-value">{{ impact_stats.total_carbon_saved|floatformat:1 }}kg</div>
+            <div class="stat-label">🌱 CO₂ Saved</div>
+            <div class="stat-change positive">{{ impact_stats.eco_conscious_users }} eco users</div>
+            <div style="margin-top: 10px;">
+                <small>🏆 Badges: {{ impact_stats.badges_earned }}</small><br>
+                <small>📊 Avg/order: {{ impact_stats.avg_carbon_per_order|floatformat:1 }}kg</small>
+            </div>
+        </div>
+
+        <!-- Users Stats -->
+        <div class="stat-card users">
+            <div class="stat-value">{{ user_stats.total_users }}</div>
+            <div class="stat-label">👥 Total Users</div>
+            <div class="stat-change positive">{{ user_stats.new_users_30d }} new (30d)</div>
+            <div style="margin-top: 10px;">
+                <small>🔥 Active (7d): {{ user_stats.active_users_7d }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sustainability Highlight -->
+    {% if impact_stats.total_carbon_saved > 0 %}
+    <div class="sustainability-highlight">
+        <div class="highlight-title">🌍 Environmental Impact Achievement</div>
+        <div class="highlight-value">{{ impact_stats.total_carbon_saved|floatformat:0 }}kg</div>
+        <p>Total CO₂ emissions saved by our eco-conscious community!</p>
+        <small>That's equivalent to planting {{ impact_stats.trees_equivalent }} trees! 🌳</small>
+    </div>
+    {% endif %}
+
+    <!-- Low Stock Alerts -->
+    {% if low_stock_products %}
+    <div class="low-stock-alert">
+        <h4>⚠️ Low Stock Alert</h4>
+        <p>The following products are running low on stock:</p>
+        {% for product in low_stock_products %}
+        <span style="background: #fff; padding: 5px 10px; margin: 2px; border-radius: 5px; display: inline-block;">
+            {{ product.name }} ({{ product.stock }} left)
+        </span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'admin:shop_product_add' %}" class="action-btn">
+            <div class="action-icon">➕</div>
+            <div>Add Product</div>
+        </a>
+        <a href="{% url 'admin:shop_order_changelist' %}" class="action-btn">
+            <div class="action-icon">📦</div>
+            <div>Manage Orders</div>
+        </a>
+        <a href="{% url 'admin:ecoadmin_export_orders' %}" class="action-btn">
+            <div class="action-icon">📊</div>
+            <div>Export Data</div>
+        </a>
+        <a href="{% url 'admin:shop_userimpact_changelist' %}" class="action-btn">
+            <div class="action-icon">🌱</div>
+            <div>Sustainability</div>
+        </a>
+    </div>
+
+    <!-- Charts and Activity -->
+    <div class="charts-container">
+        <!-- Recent Activity -->
+        <div class="chart-card">
+            <h3>🔄 Recent Activity</h3>
+            <div style="max-height: 400px; overflow-y: auto;">
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-icon" style="background: {% if activity.type == 'order' %}#e3f2fd{% elif activity.type == 'user' %}#f3e5f5{% else %}#e8f5e8{% endif %};">
+                        {{ activity.icon }}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-message">{{ activity.message }}</div>
+                        <div class="activity-time">{{ activity.time|timesince }} ago</div>
+                        {% if activity.value %}
+                        <div class="activity-value">{{ activity.value }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    {% if top_products %}
+    <div class="chart-card">
+        <h3>🏆 Top Performing Products</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            {% for product in top_products %}
+            <div style="border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; text-align: center;">
+                <h4 style="margin: 0 0 10px 0; font-size: 0.9em;">{{ product.name|truncatechars:25 }}</h4>
+                <div style="color: #4caf50; font-weight: bold;">{{ product.order_count }} sales</div>
+                <div style="color: #666; font-size: 0.8em;">${{ product.revenue|floatformat:0 }} revenue</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Auto-refresh every 5 minutes
+setTimeout(() => {
+    location.reload();
+}, 300000);
+</script>
+
+{{ block.super }}
+{% endblock %}

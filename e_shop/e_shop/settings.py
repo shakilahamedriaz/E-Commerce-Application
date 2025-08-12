@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_interface',
+    'colorfield',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -191,6 +193,79 @@ DEFAULT_FROM_EMAIL = 'E-Shop <riaz35-995@diu.edu.bd>'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ===================== ENHANCED ADMIN CONFIGURATION ===================== #
+
+# Admin Interface Configuration
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+SILENCED_SYSTEM_CHECKS = ['security.W019']
+
+# Admin Security Settings
+ADMIN_ENABLED = True
+ADMIN_URL = 'admin/'  # Change this in production for security
+
+# Session Security
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# CSRF Security
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = True
+
+# Admin Interface Theme Settings
+ADMIN_INTERFACE = {
+    'ENVIRONMENT': 'EcoCommerce Admin Dashboard',
+    'ENVIRONMENT_COLOR': '#2e7d32',  # Green theme
+    'ENVIRONMENT_CRITICAL': False,
+    'RELATED_MODAL_ACTIVE': True,
+    'RELATED_MODAL_BACKGROUND_OPACITY': 0.3,
+    'RELATED_MODAL_CLOSE_BUTTON': True,
+    'RECENT_ACTIONS_VISIBLE': True,
+    'THEME': 'green-theme',
+}
+
+# Logging Configuration for Admin Activities
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'admin_activities.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django.contrib.admin': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'shop.admin': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 
 
