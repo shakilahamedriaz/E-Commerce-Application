@@ -4,164 +4,522 @@
 {% block title %}My Stock Alerts | E-Shop{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-12">
-            <h2 class="mb-4">
-                <i class="fas fa-bell text-warning"></i> My Stock Alerts
-                <span class="badge badge-secondary ms-2">{{ alerts.count }} active alert{{ alerts.count|pluralize }}</span>
-            </h2>
-
-            {% if alerts %}
-                <div class="row">
-                    {% for alert in alerts %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
-                                {% if alert.product.image %}
-                                    <img src="{{ alert.product.image.url }}" class="card-img-top" alt="{{ alert.product.name }}" style="height: 200px; object-fit: cover;">
-                                {% else %}
-                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                        <i class="fas fa-image fa-3x text-muted"></i>
-                                    </div>
-                                {% endif %}
-
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">
-                                        <a href="{% url 'shop:product_detail' alert.product.slug %}" class="text-decoration-none">
-                                            {{ alert.product.name }}
-                                        </a>
-                                    </h5>
-                                    
-                                    <p class="card-text text-muted">{{ alert.product.description|truncatewords:15 }}</p>
-                                    
-                                    <div class="mt-auto">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <span class="h5 text-primary mb-0">${{ alert.product.price }}</span>
-                                            
-                                            {% if alert.product.stock > alert.threshold %}
-                                                <span class="badge badge-success">
-                                                    In Stock ({{ alert.product.stock }})
-                                                </span>
-                                            {% elif alert.product.stock > 0 %}
-                                                <span class="badge badge-warning">
-                                                    Low Stock ({{ alert.product.stock }})
-                                                </span>
-                                            {% else %}
-                                                <span class="badge badge-danger">Out of Stock</span>
-                                            {% endif %}
-                                        </div>
-
-                                        <div class="alert alert-info small mb-3">
-                                            <i class="fas fa-bell"></i> 
-                                            Alert when stock ≤ <strong>{{ alert.threshold }}</strong>
-                                            <br>
-                                            <small class="text-muted">Created {{ alert.created_at|date:"M d, Y" }}</small>
-                                        </div>
-
-                                        <div class="d-flex gap-2">
-                                            {% if alert.product.stock > 0 %}
-                                                <form method="post" action="{% url 'shop:cart_add' alert.product.id %}" class="flex-fill">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="quantity" value="1">
-                                                    <button type="submit" class="btn btn-primary btn-sm w-100">
-                                                        <i class="fas fa-cart-plus"></i> Add to Cart
-                                                    </button>
-                                                </form>
-                                            {% else %}
-                                                <button class="btn btn-secondary btn-sm flex-fill" disabled>
-                                                    <i class="fas fa-times"></i> Out of Stock
-                                                </button>
-                                            {% endif %}
-
-                                            <form method="post" action="{% url 'shop:stock_alert_remove' alert.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                                        title="Remove alert"
-                                                        onclick="return confirm('Remove this stock alert?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+<div class="container-fluid py-4">
+    <!-- Stock Alerts Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm alerts-header-card">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <div class="alerts-icon-header me-3">
+                                    <i class="fas fa-bell"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-1">Stock Alerts</h3>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-eye me-2"></i>{{ alerts.count }} active alert{{ alerts.count|pluralize }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Info Box -->
-                <div class="alert alert-info mt-4">
-                    <h6><i class="fas fa-info-circle"></i> How Stock Alerts Work</h6>
-                    <ul class="mb-0">
-                        <li>You'll receive notifications when product stock falls below your threshold</li>
-                        <li>Alerts are checked automatically when stock levels change</li>
-                        <li>You can set different thresholds for different products</li>
-                        <li>Remove alerts you no longer need to keep your list organized</li>
-                    </ul>
-                </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-bell-slash fa-5x text-muted mb-3"></i>
-                    <h4 class="text-muted">No active stock alerts</h4>
-                    <p class="text-muted mb-4">
-                        Set up stock alerts on product pages to get notified when items are running low or back in stock!
-                    </p>
-                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">
-                        <i class="fas fa-shopping-bag"></i> Browse Products
-                    </a>
-                </div>
-            {% endif %}
-
-            <!-- Quick Actions -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Need Something Specific?</h6>
-                            <p class="card-text small text-muted">Use our advanced search to find products and set alerts.</p>
-                            <a href="{% url 'shop:product_search' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-search"></i> Advanced Search
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Check Your Wishlist</h6>
-                            <p class="card-text small text-muted">Items in your wishlist might be on sale or back in stock.</p>
-                            <a href="{% url 'shop:wishlist' %}" class="btn btn-outline-danger btn-sm">
-                                <i class="fas fa-heart"></i> View Wishlist
-                            </a>
+                        <div class="col-auto">
+                            {% if alerts %}
+                                <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Set More Alerts
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    {% if alerts %}
+        <div class="row g-4">
+            {% for alert in alerts %}
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card border-0 shadow-sm h-100 alert-card">
+                        <div class="position-relative">
+                            {% if alert.product.image %}
+                                <img src="{{ alert.product.image.url }}" 
+                                     class="card-img-top alert-product-image" 
+                                     alt="{{ alert.product.name }}">
+                            {% else %}
+                                <div class="alert-placeholder-image">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if alert.product.stock > alert.threshold %}
+                                    <span class="alert-status-badge in-stock">
+                                        <i class="fas fa-check-circle me-1"></i>In Stock
+                                    </span>
+                                {% elif alert.product.stock > 0 %}
+                                    <span class="alert-status-badge low-stock">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Low Stock
+                                    </span>
+                                {% else %}
+                                    <span class="alert-status-badge out-of-stock">
+                                        <i class="fas fa-times-circle me-1"></i>Out of Stock
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="alert-threshold-badge">
+                                    <i class="fas fa-bell me-1"></i>≤{{ alert.threshold }}
+                                </span>
+                            </div>
+                            
+                            <div class="position-absolute bottom-0 start-0 m-2">
+                                <span class="price-badge">${{ alert.product.price }}</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-3 d-flex flex-column">
+                            <h6 class="card-title fw-semibold mb-2">
+                                <a href="{% url 'shop:product_detail' alert.product.slug %}" 
+                                   class="text-decoration-none text-dark stretched-link-override">
+                                    {{ alert.product.name|truncatechars:40 }}
+                                </a>
+                            </h6>
+                            
+                            <p class="card-text text-muted small mb-3 flex-grow-1">
+                                {{ alert.product.description|truncatewords:10 }}
+                            </p>
+                            
+                            <div class="alert-info-box mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="alert-label">Current Stock</span>
+                                    <span class="alert-value stock-{{ alert.product.stock|yesno:'positive,zero' }}">
+                                        {{ alert.product.stock }} units
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="alert-label">Alert Threshold</span>
+                                    <span class="alert-value">{{ alert.threshold }} units</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="alert-label">Created</span>
+                                    <span class="alert-value">{{ alert.created_at|date:"M d" }}</span>
+                                </div>
+                            </div>
+
+                            <div class="alert-actions mt-auto">
+                                {% if alert.product.stock > 0 %}
+                                    <form method="post" action="{% url 'shop:cart_add' alert.product.id %}" class="mb-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm w-100 mb-2" disabled>
+                                        <i class="fas fa-ban me-2"></i>Out of Stock
+                                    </button>
+                                {% endif %}
+
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'shop:product_detail' alert.product.slug %}" 
+                                       class="btn btn-outline-primary btn-sm flex-fill">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                    <form method="post" action="{% url 'shop:stock_alert_remove' alert.id %}" class="flex-fill">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100" 
+                                                title="Remove alert"
+                                                onclick="return confirm('Remove this stock alert?')">
+                                            <i class="fas fa-trash me-1"></i>Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Information Panel -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm info-panel">
+                    <div class="card-header bg-transparent border-0 py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-lightbulb me-2 text-warning"></i>How Stock Alerts Work
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <h6>Smart Notifications</h6>
+                                    <p class="small text-muted">Get notified when stock falls below your threshold</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </div>
+                                    <h6>Real-time Updates</h6>
+                                    <p class="small text-muted">Alerts are checked automatically as stock changes</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </div>
+                                    <h6>Custom Thresholds</h6>
+                                    <p class="small text-muted">Set different alert levels for different products</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-item">
+                                    <div class="info-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <h6>Easy Management</h6>
+                                    <p class="small text-muted">Add or remove alerts anytime to stay organized</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm empty-alerts-card">
+                    <div class="card-body text-center py-5">
+                        <div class="empty-alerts-icon mb-4">
+                            <i class="fas fa-bell-slash"></i>
+                        </div>
+                        <h4 class="empty-alerts-title mb-3">No active stock alerts</h4>
+                        <p class="empty-alerts-description mb-4">
+                            Set up stock alerts on product pages to get notified when items are running low 
+                            or back in stock. Never miss out on your favorite products again!
+                        </p>
+                        <div class="empty-alerts-actions">
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                            </a>
+                            <a href="{% url 'shop:product_search' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="fas fa-search me-2"></i>Search Products
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm quick-action-card">
+                <div class="card-body text-center py-4">
+                    <div class="quick-action-icon mb-3">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h6 class="quick-action-title">Find Specific Products</h6>
+                    <p class="quick-action-description small text-muted mb-3">
+                        Use advanced search to find exactly what you need
+                    </p>
+                    <a href="{% url 'shop:product_search' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-search me-2"></i>Advanced Search
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm quick-action-card">
+                <div class="card-body text-center py-4">
+                    <div class="quick-action-icon mb-3">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h6 class="quick-action-title">Check Your Wishlist</h6>
+                    <p class="quick-action-description small text-muted mb-3">
+                        Items might be on sale or back in stock
+                    </p>
+                    <a href="{% url 'shop:wishlist' %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-heart me-2"></i>View Wishlist
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm quick-action-card">
+                <div class="card-body text-center py-4">
+                    <div class="quick-action-icon mb-3">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h6 class="quick-action-title">Notification Settings</h6>
+                    <p class="quick-action-description small text-muted mb-3">
+                        Manage how you receive stock alerts
+                    </p>
+                    <a href="{% url 'shop:notifications' %}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-cog me-2"></i>Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Custom Styles -->
 <style>
-.badge {
-    font-size: 0.75rem;
-}
-
-.alert-info {
-    background-color: #e3f2fd;
-    border-color: #bbdefb;
-    color: #0d47a1;
-}
-
-.card-img-top {
-    transition: transform 0.2s;
-}
-
-.card:hover .card-img-top {
-    transform: scale(1.02);
-}
-
-.btn-group-sm > .btn, .btn-sm {
-    font-size: 0.875rem;
-}
+    .alerts-header-card {
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .alerts-icon-header {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .alert-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .alert-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .alert-product-image {
+        height: 220px;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+    
+    .alert-card:hover .alert-product-image {
+        transform: scale(1.05);
+    }
+    
+    .alert-placeholder-image {
+        height: 220px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 2rem;
+    }
+    
+    .alert-status-badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .alert-status-badge.in-stock {
+        background: rgba(40, 167, 69, 0.9);
+        color: white;
+    }
+    
+    .alert-status-badge.low-stock {
+        background: rgba(255, 193, 7, 0.9);
+        color: #856404;
+    }
+    
+    .alert-status-badge.out-of-stock {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+    }
+    
+    .alert-threshold-badge {
+        background: rgba(108, 117, 125, 0.9);
+        color: white;
+        padding: 0.4rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+    
+    .price-badge {
+        background: rgba(27, 184, 2, 0.95);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .alert-info-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .alert-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    
+    .alert-value {
+        font-size: 0.8rem;
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    .alert-value.stock-positive {
+        color: #28a745;
+    }
+    
+    .alert-value.stock-zero {
+        color: #dc3545;
+    }
+    
+    .alert-actions .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .alert-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .info-panel {
+        border-radius: 16px;
+    }
+    
+    .info-item {
+        text-align: center;
+    }
+    
+    .info-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin: 0 auto 1rem;
+    }
+    
+    .empty-alerts-card {
+        border-radius: 16px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+    
+    .empty-alerts-icon {
+        font-size: 5rem;
+        color: #ffc107;
+        opacity: 0.7;
+    }
+    
+    .empty-alerts-title {
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    .empty-alerts-description {
+        color: #6c757d;
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .empty-alerts-actions .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .empty-alerts-actions .btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    .quick-action-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .quick-action-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 1.2rem;
+        margin: 0 auto;
+    }
+    
+    .quick-action-title {
+        color: #495057;
+        font-weight: 600;
+    }
+    
+    .quick-action-description {
+        line-height: 1.4;
+    }
+    
+    .stretched-link-override {
+        position: relative;
+        z-index: 2;
+    }
+    
+    @media (max-width: 768px) {
+        .alert-card:hover {
+            transform: none;
+        }
+        
+        .alert-card:hover .alert-product-image {
+            transform: none;
+        }
+        
+        .empty-alerts-actions .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-alerts-actions .btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .quick-action-card:hover {
+            transform: none;
+        }
+    }
 </style>
 {% endblock %}

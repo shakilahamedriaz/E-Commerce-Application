@@ -1,9 +1,172 @@
 {% extends 'shop/base.html' %}
 {% block title %}Payment Failed{% endblock %}
+
 {% block content %}
-<div class="text-center py-5">
-  <h2 class="text-danger"><i class="fa fa-times-circle"></i> Payment Failed</h2>
-  <p>Something went wrong. Please try again.</p>
-  <a href="{% url 'shop:checkout' %}" class="btn btn-primary mt-3">Back to Checkout</a>
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg payment-fail-card">
+                <div class="card-body text-center py-5">
+                    <div class="fail-animation mb-4">
+                        <div class="error-circle">
+                            <div class="error-cross">
+                                <div class="cross-line cross-line-1"></div>
+                                <div class="cross-line cross-line-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="fail-title mb-3">Payment Failed</h2>
+                    <p class="fail-description mb-4">
+                        😔 We couldn't process your payment. This can happen for various reasons, but don't worry - you can try again!
+                    </p>
+                    
+                    <div class="fail-details mb-4">
+                        <div class="detail-item">
+                            <i class="fas fa-info-circle text-info me-2"></i>
+                            <span>Your cart items are still saved</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-shield-alt text-info me-2"></i>
+                            <span>No charges were made to your account</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-headset text-info me-2"></i>
+                            <span>Contact support if the issue persists</span>
+                        </div>
+                    </div>
+                    
+                    <div class="fail-actions">
+                        <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg mb-2">
+                            <i class="fas fa-redo me-2"></i>Try Payment Again
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-secondary flex-fill">
+                                <i class="fas fa-shopping-cart me-2"></i>View Cart
+                            </a>
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .payment-fail-card {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+    
+    .fail-animation {
+        margin: 0 auto 2rem;
+    }
+    
+    .error-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        position: relative;
+        margin: 0 auto;
+        animation: error-bounce 1s ease-in-out;
+    }
+    
+    .error-cross {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .cross-line {
+        width: 30px;
+        height: 4px;
+        background: white;
+        border-radius: 2px;
+        position: absolute;
+        animation: cross-draw 0.5s ease-in-out 0.5s both;
+    }
+    
+    .cross-line-1 {
+        transform: rotate(45deg);
+    }
+    
+    .cross-line-2 {
+        transform: rotate(-45deg);
+    }
+    
+    .fail-title {
+        color: #dc3545;
+        font-weight: 700;
+    }
+    
+    .fail-description {
+        color: #6c757d;
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+    
+    .fail-details {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .fail-actions .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .fail-actions .btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    @keyframes error-bounce {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes cross-draw {
+        0% { opacity: 0; transform: scale(0); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+        .fail-actions .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .fail-actions .btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .d-flex.gap-2 {
+            flex-direction: column !important;
+        }
+        
+        .flex-fill {
+            width: 100% !important;
+        }
+    }
+</style>
 {% endblock %}

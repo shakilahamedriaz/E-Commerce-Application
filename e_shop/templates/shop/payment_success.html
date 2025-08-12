@@ -1,9 +1,159 @@
 {% extends 'shop/base.html' %}
 {% block title %}Payment Success{% endblock %}
+
 {% block content %}
-<div class="text-center py-5">
-  <h2 class="text-success"><i class="fa fa-check-circle"></i> Payment Successful</h2>
-  <p>Your order has been placed. Thank you!</p>
-  <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-primary mt-3">View Impact</a>
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg payment-success-card">
+                <div class="card-body text-center py-5">
+                    <div class="success-animation mb-4">
+                        <div class="checkmark-circle">
+                            <div class="checkmark"></div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="success-title mb-3">Payment Successful!</h2>
+                    <p class="success-description mb-4">
+                        🎉 Thank you for your purchase! Your order has been confirmed and we'll start processing it right away.
+                    </p>
+                    
+                    <div class="success-details mb-4">
+                        <div class="detail-item">
+                            <i class="fas fa-receipt text-success me-2"></i>
+                            <span>Order confirmation sent to your email</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-truck text-success me-2"></i>
+                            <span>Processing will begin within 24 hours</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-leaf text-success me-2"></i>
+                            <span>Your environmental impact has been calculated</span>
+                        </div>
+                    </div>
+                    
+                    <div class="success-actions">
+                        <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-success btn-lg mb-2">
+                            <i class="fas fa-leaf me-2"></i>View Environmental Impact
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'shop:profile' %}" class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-user me-2"></i>My Orders
+                            </a>
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary flex-fill">
+                                <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .payment-success-card {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+    
+    .success-animation {
+        margin: 0 auto 2rem;
+    }
+    
+    .checkmark-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        position: relative;
+        margin: 0 auto;
+        animation: checkmark-bounce 1s ease-in-out;
+    }
+    
+    .checkmark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 30px;
+        height: 15px;
+        border: 4px solid white;
+        border-top: none;
+        border-right: none;
+        transform: translate(-50%, -60%) rotate(-45deg);
+        animation: checkmark-draw 0.5s ease-in-out 0.5s both;
+    }
+    
+    .success-title {
+        color: #28a745;
+        font-weight: 700;
+    }
+    
+    .success-description {
+        color: #6c757d;
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+    
+    .success-details {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .success-actions .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .success-actions .btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    @keyframes checkmark-bounce {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes checkmark-draw {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .success-actions .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .success-actions .btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .d-flex.gap-2 {
+            flex-direction: column !important;
+        }
+        
+        .flex-fill {
+            width: 100% !important;
+        }
+    }
+</style>
 {% endblock %}

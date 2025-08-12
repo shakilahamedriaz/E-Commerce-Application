@@ -1,9 +1,173 @@
 {% extends 'shop/base.html' %}
 {% block title %}Payment Cancelled{% endblock %}
+
 {% block content %}
-<div class="text-center py-5">
-  <h2 class="text-warning"><i class="fa fa-exclamation-circle"></i> Payment Cancelled</h2>
-  <p>Your payment was cancelled. You can resume checkout anytime.</p>
-  <a href="{% url 'shop:cart_detail' %}" class="btn btn-primary mt-3">Back to Cart</a>
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+            <div class="card border-0 shadow-lg payment-cancel-card">
+                <div class="card-body text-center py-5">
+                    <div class="cancel-animation mb-4">
+                        <div class="warning-circle">
+                            <div class="warning-icon">
+                                <div class="warning-line"></div>
+                                <div class="warning-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="cancel-title mb-3">Payment Cancelled</h2>
+                    <p class="cancel-description mb-4">
+                        🤔 No worries! Your payment was cancelled and you can resume checkout whenever you're ready.
+                    </p>
+                    
+                    <div class="cancel-details mb-4">
+                        <div class="detail-item">
+                            <i class="fas fa-shopping-cart text-warning me-2"></i>
+                            <span>Your cart items are safely saved</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock text-warning me-2"></i>
+                            <span>You can complete checkout anytime</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-heart text-warning me-2"></i>
+                            <span>Items can be moved to wishlist</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cancel-actions">
+                        <a href="{% url 'shop:cart_detail' %}" class="btn btn-warning btn-lg mb-2">
+                            <i class="fas fa-shopping-cart me-2"></i>Back to Cart
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'shop:checkout' %}" class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-credit-card me-2"></i>Try Again
+                            </a>
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-secondary flex-fill">
+                                <i class="fas fa-shopping-bag me-2"></i>Keep Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .payment-cancel-card {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+    
+    .cancel-animation {
+        margin: 0 auto 2rem;
+    }
+    
+    .warning-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffc107, #fd7e14);
+        position: relative;
+        margin: 0 auto;
+        animation: warning-bounce 1s ease-in-out;
+    }
+    
+    .warning-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    .warning-line {
+        width: 4px;
+        height: 20px;
+        background: white;
+        border-radius: 2px;
+        margin: 0 auto 5px;
+        animation: warning-draw 0.5s ease-in-out 0.5s both;
+    }
+    
+    .warning-dot {
+        width: 4px;
+        height: 4px;
+        background: white;
+        border-radius: 50%;
+        margin: 0 auto;
+        animation: warning-draw 0.5s ease-in-out 0.7s both;
+    }
+    
+    .cancel-title {
+        color: #fd7e14;
+        font-weight: 700;
+    }
+    
+    .cancel-description {
+        color: #6c757d;
+        line-height: 1.6;
+        font-size: 1.1rem;
+    }
+    
+    .cancel-details {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .cancel-actions .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .cancel-actions .btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    @keyframes warning-bounce {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes warning-draw {
+        0% { opacity: 0; transform: scale(0); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+        .cancel-actions .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cancel-actions .btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .d-flex.gap-2 {
+            flex-direction: column !important;
+        }
+        
+        .flex-fill {
+            width: 100% !important;
+        }
+    }
+</style>
 {% endblock %}
