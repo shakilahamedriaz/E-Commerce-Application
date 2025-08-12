@@ -4,160 +4,300 @@
 {% block title %}{{ product.name }} | E-Shop{% endblock %}
 
 {% block content %}
-<div class="row g-4">
-  <div class="col-md-5">
-    {% if product.image %}
-      <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
-    {% else %}
-      <div class="border rounded p-5 text-center text-muted bg-light">
-        <i class="fas fa-image fa-3x"></i>
-        <p class="mt-2">No Image</p>
-      </div>
-    {% endif %}
-  </div>
-  
-  <div class="col-md-7">
-    <h2 class="fw-bold mb-1">{{ product.name }}</h2>
-    <p class="text-muted mb-2">Category: {{ product.category.name }}</p>
-    <p>{{ product.description|default:'No description provided.' }}</p>
-    
-    <!-- Enhanced badges with reviews -->
-    <div class="d-flex gap-3 mb-3 flex-wrap">
-      <span class="badge badge-impact">{{ product.effective_carbon_kg }} kg CO₂e</span>
-      <span class="badge bg-success">Ethics {{ product.ethics_score }}/100</span>
-      {% if product.reviews.count > 0 %}
-        <span class="badge bg-warning text-dark">
-          {{ product.reviews.all|length }} review{{ product.reviews.all|length|pluralize }}
-          ({{ product.average_rating|floatformat:1 }}★)
-        </span>
-      {% endif %}
-      
-      <!-- Carbon Intelligence Badge -->
-      {% if carbon_analysis.badge_eligible %}
-        <span class="badge bg-success position-relative cursor-pointer carbon-badge" 
-              data-bs-toggle="modal" 
-              data-bs-target="#carbonBadgeModal"
-              title="Click to learn more">
-          {{ carbon_analysis.badge_icon }} {{ carbon_analysis.badge_type|title }}
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-            <i class="fas fa-info"></i>
-          </span>
-        </span>
-      {% endif %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'shop:home' %}" class="text-decoration-none">Home</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'shop:product_list' %}" class="text-decoration-none">Products</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'shop:product_list_by_category' product.category.slug %}" class="text-decoration-none">
+                {{ product.category.name }}
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name|truncatechars:30 }}</li>
+    </ol>
+</nav>
+
+<!-- Product Detail -->
+<div class="row g-5">
+    <!-- Product Image -->
+    <div class="col-lg-6">
+        <div class="product-image-section">
+            {% if product.image %}
+                <div class="main-image-container position-relative">
+                    <img src="{{ product.image.url }}" 
+                         class="img-fluid rounded-3 shadow-sm w-100" 
+                         alt="{{ product.name }}"
+                         style="object-fit: cover; min-height: 400px;">
+                    
+                    <!-- Carbon Impact Overlay -->
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <div class="carbon-impact-badge">
+                            <i class="fas fa-leaf me-2"></i>
+                            <div>
+                                <div class="fw-bold">{{ product.effective_carbon_kg|floatformat:1 }}kg</div>
+                                <small>CO₂ Impact</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="no-image-placeholder">
+                    <i class="fas fa-image fa-4x text-muted mb-3"></i>
+                    <p class="text-muted">No Image Available</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
     
-    <h4 class="text-success mb-3">${{ product.price }}</h4>
-    
-    <!-- Stock status -->
-    {% if product.stock > 0 %}
-      <p class="text-success small mb-2">
-        <i class="fa fa-check-circle"></i> In Stock ({{ product.stock }} available)
-      </p>
-    {% else %}
-      <p class="text-danger small mb-2">
-        <i class="fa fa-times-circle"></i> Out of Stock
-      </p>
-    {% endif %}
-    
-    {% if user.is_authenticated %}
-      <div class="row g-2 mb-3">
-        <div class="col-md-8">
-          {% if product.stock > 0 %}
-            <form method="post" action="{% url 'shop:cart_add' product.id %}" class="d-flex gap-2 align-items-end">
-              {% csrf_token %}
-              <div>
-                <label for="quantity" class="form-label small">Quantity:</label>
-                <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 80px;">
-              </div>
-              <button type="submit" class="btn btn-primary">
-                <i class="fa fa-cart-plus me-1"></i>Add to Cart
-              </button>
-            </form>
-          {% else %}
-            <button class="btn btn-secondary" disabled>
-              <i class="fa fa-times me-1"></i>Out of Stock
-            </button>
-          {% endif %}
-        </div>
-        
-        <div class="col-md-4">
-          <!-- Wishlist and Stock Alert buttons -->
-          <div class="d-flex gap-2">
-            {% if product in user.wishlist_items.all %}
-              <form method="post" action="{% url 'shop:wishlist_remove' product.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-danger btn-sm" title="Remove from wishlist">
-                  <i class="fas fa-heart"></i>
-                </button>
-              </form>
-            {% else %}
-              <form method="post" action="{% url 'shop:wishlist_add' product.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary btn-sm" title="Add to wishlist">
-                  <i class="far fa-heart"></i>
-                </button>
-              </form>
+    <!-- Product Information -->
+    <div class="col-lg-6">
+        <div class="product-info">
+            <!-- Category Badge -->
+            <div class="mb-3">
+                <a href="{% url 'shop:product_list_by_category' product.category.slug %}" 
+                   class="badge bg-light text-primary text-decoration-none">
+                    {{ product.category.name }}
+                </a>
+            </div>
+            
+            <!-- Product Title -->
+            <h1 class="product-title fw-bold text-dark mb-3">{{ product.name }}</h1>
+            
+            <!-- Rating and Reviews -->
+            {% if product.reviews.count > 0 %}
+                <div class="rating-section mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= product.average_rating|floatformat:0 %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="fw-semibold">{{ product.average_rating|floatformat:1 }}</span>
+                        <span class="text-muted">({{ product.reviews.count }} review{{ product.reviews.count|pluralize }})</span>
+                    </div>
+                </div>
             {% endif %}
             
-            <!-- Stock Alert Button -->
-            <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#stockAlertModal" title="Set stock alert">
-              <i class="fas fa-bell"></i>
-            </button>
-          </div>
+            <!-- Price -->
+            <div class="price-section mb-4">
+                <h2 class="text-primary fw-bold mb-0">${{ product.price }}</h2>
+            </div>
+            
+            <!-- Description -->
+            <div class="description-section mb-4">
+                <p class="text-muted lh-lg">{{ product.description|default:'No description provided.' }}</p>
+            </div>
+            <!-- Environmental & Ethics Badges -->
+            <div class="badges-section mb-4">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="info-badge text-center">
+                            <div class="badge-icon mb-2">
+                                <i class="fas fa-leaf text-success fa-lg"></i>
+                            </div>
+                            <div class="badge-value fw-bold text-dark">{{ product.effective_carbon_kg|floatformat:1 }}kg</div>
+                            <small class="text-muted">CO₂ Impact</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="info-badge text-center">
+                            <div class="badge-icon mb-2">
+                                <i class="fas fa-hand-holding-heart text-primary fa-lg"></i>
+                            </div>
+                            <div class="badge-value fw-bold text-dark">{{ product.ethics_score }}/100</div>
+                            <small class="text-muted">Ethics Score</small>
+                        </div>
+                    </div>
+                    {% if carbon_analysis.badge_eligible %}
+                    <div class="col-12 col-md-4">
+                        <div class="info-badge text-center cursor-pointer" 
+                             data-bs-toggle="modal" 
+                             data-bs-target="#carbonBadgeModal">
+                            <div class="badge-icon mb-2">
+                                {{ carbon_analysis.badge_icon }}
+                            </div>
+                            <div class="badge-value fw-bold text-dark">{{ carbon_analysis.badge_type|title }}</div>
+                            <small class="text-muted">Achievement</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Stock Status -->
+            <div class="stock-section mb-4">
+                {% if product.stock > 0 %}
+                    <div class="alert alert-success border-0 d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span class="fw-semibold">In Stock</span>
+                        <span class="ms-auto text-muted">({{ product.stock }} available)</span>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger border-0 d-flex align-items-center">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <span class="fw-semibold">Out of Stock</span>
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Actions Section -->
+            {% if user.is_authenticated %}
+                <div class="actions-section mb-4">
+                    {% if product.stock > 0 %}
+                        <form method="post" action="{% url 'shop:cart_add' product.id %}" class="mb-3">
+                            {% csrf_token %}
+                            <div class="row g-3 align-items-end">
+                                <div class="col-4">
+                                    <label for="quantity" class="form-label small fw-semibold">Quantity</label>
+                                    <input type="number" id="quantity" name="quantity" value="1" 
+                                           min="1" max="{{ product.stock }}" 
+                                           class="form-control">
+                                </div>
+                                <div class="col-8">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+                            <i class="fas fa-times me-2"></i>Currently Unavailable
+                        </button>
+                    {% endif %}
+                    
+                    <!-- Secondary Actions -->
+                    <div class="d-flex gap-2">
+                        <!-- Wishlist Button -->
+                        {% if product in user.wishlist_items.all %}
+                            <form method="post" action="{% url 'shop:wishlist_remove' product.id %}" class="flex-fill">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-heart me-2"></i>Remove from Wishlist
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'shop:wishlist_add' product.id %}" class="flex-fill">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="far fa-heart me-2"></i>Add to Wishlist
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <!-- Stock Alert Button -->
+                        <button type="button" class="btn btn-outline-warning" 
+                                data-bs-toggle="modal" data-bs-target="#stockAlertModal">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="actions-section mb-4">
+                    <a href="{% url 'shop:login' %}?next={{ request.path }}" 
+                       class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Purchase
+                    </a>
+                </div>
+            {% endif %}
+            <!-- Sustainability Information -->
+            {% if alternative or ladder.best %}
+                <div class="sustainability-section">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-leaf text-success me-2"></i>Sustainability Insights
+                    </h6>
+                    
+                    {% if alternative %}
+                        <div class="alert alert-info border-0 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lightbulb text-info me-3 fa-lg"></i>
+                                <div>
+                                    <div class="fw-semibold">Greener Alternative Available</div>
+                                    <small>
+                                        Consider <a href="{% url 'shop:product_detail' alternative.slug %}" 
+                                                   class="text-decoration-none fw-semibold">{{ alternative.name }}</a> 
+                                        ({{ alternative.effective_carbon_kg|floatformat:1 }}kg CO₂e)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if ladder.best and ladder.best.id != product.id %}
+                        <div class="alert alert-warning border-0 mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-award text-warning me-3 fa-lg"></i>
+                                <div>
+                                    <div class="fw-semibold">Best in Category</div>
+                                    <small>
+                                        <a href="{% url 'shop:product_detail' ladder.best.slug %}" 
+                                           class="text-decoration-none fw-semibold">{{ ladder.best.name }}</a> 
+                                        has the lowest impact ({{ ladder.best.effective_carbon_kg|floatformat:1 }}kg CO₂e)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
-      </div>
-    {% else %}
-      <a href="{% url 'shop:login' %}?next={{ request.path }}" class="btn btn-primary">Login to Buy</a>
-    {% endif %}
-    
-    <hr>
-    
-    <!-- Sustainability information -->
-    {% if alternative %}
-      <p class="impact-alt">
-        <i class="fas fa-leaf text-success"></i> 
-        Greener alternative: <a href="{% url 'shop:product_detail' alternative.slug %}">{{ alternative.name }}</a> 
-        ({{ alternative.effective_carbon_kg }} kg CO₂e)
-      </p>
-    {% endif %}
-    {% if ladder.best and ladder.best.id != product.id %}
-      <p class="impact-alt">
-        <i class="fas fa-award text-warning"></i>
-        Best in category: <a href="{% url 'shop:product_detail' ladder.best.slug %}">{{ ladder.best.name }}</a> 
-        ({{ ladder.best.effective_carbon_kg }} kg)
-      </p>
-    {% endif %}
-  </div>
+    </div>
 </div>
 
 <!-- Reviews Section -->
 <div class="mt-5">
-  <div class="row">
-    <div class="col-lg-8">
-      <h5>Customer Reviews</h5>
-      
-      {% if product.reviews.exists %}
-        <!-- Review Summary -->
-        <div class="row mb-4">
-          <div class="col-md-4">
-            <div class="text-center">
-              <h2 class="mb-0">{{ product.average_rating|floatformat:1 }}</h2>
-              <div class="text-warning mb-1">
-                {% for i in "12345" %}
-                  {% if forloop.counter <= product.average_rating %}
-                    <i class="fas fa-star"></i>
-                  {% else %}
-                    <i class="far fa-star"></i>
-                  {% endif %}
-                {% endfor %}
-              </div>
-              <small class="text-muted">{{ product.reviews.count }} review{{ product.reviews.count|pluralize }}</small>
-            </div>
-          </div>
-          <div class="col-md-8">
-            <!-- Rating distribution would go here -->
-          </div>
-        </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="reviews-section">
+                <h4 class="fw-bold text-dark mb-4">
+                    <i class="fas fa-comments me-2"></i>Customer Reviews
+                </h4>
+                
+                {% if product.reviews.exists %}
+                    <!-- Review Summary -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4 text-center">
+                                    <div class="rating-overview">
+                                        <h2 class="display-4 fw-bold text-primary mb-1">{{ product.average_rating|floatformat:1 }}</h2>
+                                        <div class="star-rating mb-2">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= product.average_rating|floatformat:0 %}
+                                                    <i class="fas fa-star text-warning fa-lg"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-muted fa-lg"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <small class="text-muted">Based on {{ product.reviews.count }} review{{ product.reviews.count|pluralize }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="rating-distribution">
+                                        {% for rating in "54321" %}
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="me-2 small">{{ rating }}</span>
+                                                <i class="fas fa-star text-warning me-2"></i>
+                                                <div class="progress flex-fill me-2" style="height: 8px;">
+                                                    <div class="progress-bar bg-warning" style="width: 60%"></div>
+                                                </div>
+                                                <small class="text-muted">60%</small>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         
         <!-- Individual Reviews -->
         {% for review in product.reviews.all|slice:":5" %}
@@ -347,5 +487,104 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Custom Styles -->
+<style>
+    .carbon-impact-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+    }
+    
+    .no-image-placeholder {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 4rem 2rem;
+        text-align: center;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .info-badge {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .info-badge:hover {
+        background: var(--primary-ultra-light);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+    
+    .star-rating {
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .rating-overview {
+        padding: 1rem;
+    }
+    
+    .rating-distribution .progress {
+        height: 8px;
+        background-color: #f1f3f4;
+    }
+    
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: #6c757d;
+        font-weight: bold;
+    }
+    
+    .breadcrumb-item.active {
+        color: #6c757d;
+    }
+    
+    .product-title {
+        font-size: 2rem;
+        line-height: 1.2;
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+        .product-title {
+            font-size: 1.5rem;
+        }
+        
+        .carbon-impact-badge {
+            padding: 0.75rem;
+            min-width: 100px;
+        }
+        
+        .info-badge {
+            padding: 0.75rem;
+        }
+        
+        .rating-overview h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
 
 {% endblock %}

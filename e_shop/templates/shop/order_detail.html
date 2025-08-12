@@ -4,96 +4,193 @@
 {% block title %}Order #{{ order.id }} Details{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">
-                        <i class="fas fa-receipt"></i> Order #{{ order.id }}
-                        <span class="badge badge-{{ order.get_status_display_class }} ms-2">{{ order.status }}</span>
-                    </h4>
-                </div>
-                
-                <div class="card-body">
-                    <!-- Order Status Timeline -->
-                    <div class="mb-4">
-                        <h5>Order Status</h5>
-                        <div class="timeline">
-                            {% for step in status_timeline %}
-                                <div class="timeline-item {% if step.completed %}completed{% endif %}">
-                                    <div class="timeline-marker">
-                                        {% if step.completed %}
-                                            <i class="fas fa-check-circle text-success"></i>
-                                        {% else %}
-                                            <i class="far fa-circle text-muted"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6 class="mb-1">{{ step.status }}</h6>
-                                        {% if step.date %}
-                                            <small class="text-muted">{{ step.date|date:"M d, Y H:i" }}</small>
-                                        {% endif %}
-                                    </div>
+<div class="container-fluid py-4">
+    <!-- Order Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm order-header-card">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <div class="d-flex align-items-center">
+                                <div class="order-icon me-3">
+                                    <i class="fas fa-receipt"></i>
                                 </div>
-                            {% endfor %}
+                                <div>
+                                    <h3 class="mb-1">Order #{{ order.id }}</h3>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-calendar-alt me-2"></i>Placed on {{ order.created|date:"F d, Y" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge order-status-badge status-{{ order.status|lower }}">
+                                {{ order.get_status_display|default:order.status }}
+                            </span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <!-- Tracking Information -->
-                    {% if order.tracking_number %}
-                        <div class="alert alert-info">
-                            <h6><i class="fas fa-truck"></i> Tracking Information</h6>
-                            <p class="mb-1"><strong>Tracking Number:</strong> {{ order.tracking_number }}</p>
-                            {% if order.courier_service %}
-                                <p class="mb-1"><strong>Courier:</strong> {{ order.courier_service }}</p>
-                            {% endif %}
-                            {% if order.estimated_delivery %}
-                                <p class="mb-0"><strong>Estimated Delivery:</strong> {{ order.estimated_delivery|date:"M d, Y" }}</p>
-                            {% endif %}
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Order Timeline -->
+            <div class="card border-0 shadow-sm mb-4 timeline-card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-route me-2 text-primary"></i>Order Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="order-timeline">
+                        {% for step in status_timeline %}
+                            <div class="timeline-step {% if step.completed %}completed{% endif %} {% if step.current %}current{% endif %}">
+                                <div class="timeline-marker">
+                                    {% if step.completed %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% elif step.current %}
+                                        <i class="fas fa-clock"></i>
+                                    {% else %}
+                                        <i class="far fa-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="step-title">{{ step.status }}</h6>
+                                    {% if step.date %}
+                                        <small class="step-date">{{ step.date|date:"M d, Y H:i" }}</small>
+                                    {% endif %}
+                                    {% if step.description %}
+                                        <p class="step-description">{{ step.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tracking Information -->
+            {% if order.tracking_number %}
+                <div class="card border-0 shadow-sm mb-4 tracking-card">
+                    <div class="card-header bg-transparent border-0 py-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-truck me-2 text-primary"></i>Tracking Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="tracking-info">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="tracking-detail">
+                                        <label class="tracking-label">Tracking Number</label>
+                                        <p class="tracking-value">{{ order.tracking_number }}</p>
+                                    </div>
+                                </div>
+                                {% if order.courier_service %}
+                                <div class="col-md-4">
+                                    <div class="tracking-detail">
+                                        <label class="tracking-label">Courier Service</label>
+                                        <p class="tracking-value">{{ order.courier_service }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% if order.estimated_delivery %}
+                                <div class="col-md-4">
+                                    <div class="tracking-detail">
+                                        <label class="tracking-label">Estimated Delivery</label>
+                                        <p class="tracking-value">{{ order.estimated_delivery|date:"M d, Y" }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endif %}
+                    </div>
+                </div>
+            {% endif %}
 
-                    <!-- Order Items -->
-                    <h5>Order Items</h5>
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in order.items.all %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                {% if item.product.image %}
-                                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" 
-                                                         style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
-                                                {% endif %}
-                                                <div>
-                                                    <h6 class="mb-0">{{ item.product.name }}</h6>
-                                                    <small class="text-muted">{{ item.product.category.name }}</small>
+            <!-- Order Items -->
+            <div class="card border-0 shadow-sm order-items-card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shopping-bag me-2 text-primary"></i>Order Items
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="order-items">
+                        {% for item in order.items.all %}
+                            <div class="order-item">
+                                <div class="row align-items-center g-3">
+                                    <div class="col-auto">
+                                        <div class="item-image">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid">
+                                            {% else %}
+                                                <div class="placeholder-image">
+                                                    <i class="fas fa-box"></i>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>${{ item.price }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>${{ item.get_cost }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr class="table-active">
-                                    <th colspan="3">Total</th>
-                                    <th>${{ order.get_total_cost }}</th>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="item-details">
+                                            <h6 class="item-name">{{ item.product.name }}</h6>
+                                            <p class="item-category">{{ item.product.category.name }}</p>
+                                            {% if item.product.brand %}
+                                                <p class="item-brand">{{ item.product.brand }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="item-price">
+                                            <span class="price-label">Price</span>
+                                            <span class="price-value">${{ item.price }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="item-quantity">
+                                            <span class="quantity-label">Qty</span>
+                                            <span class="quantity-value">{{ item.quantity }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="item-total">
+                                            <span class="total-label">Total</span>
+                                            <span class="total-value">${{ item.get_cost }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="order-summary">
+                            <div class="row">
+                                <div class="col-md-6 ms-auto">
+                                    <div class="summary-row">
+                                        <span class="summary-label">Subtotal</span>
+                                        <span class="summary-value">${{ order.get_subtotal|default:order.get_total_cost }}</span>
+                                    </div>
+                                    {% if order.shipping_cost %}
+                                    <div class="summary-row">
+                                        <span class="summary-label">Shipping</span>
+                                        <span class="summary-value">${{ order.shipping_cost }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if order.tax_amount %}
+                                    <div class="summary-row">
+                                        <span class="summary-label">Tax</span>
+                                        <span class="summary-value">${{ order.tax_amount }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <div class="summary-row summary-total">
+                                        <span class="summary-label">Total</span>
+                                        <span class="summary-value">${{ order.get_total_cost }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -101,104 +198,470 @@
 
         <div class="col-lg-4">
             <!-- Delivery Information -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-map-marker-alt"></i> Delivery Information</h5>
+            <div class="card border-0 shadow-sm mb-4 delivery-card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-map-marker-alt me-2 text-primary"></i>Delivery Information
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <address>
-                        <strong>{{ order.first_name }} {{ order.last_name }}</strong><br>
-                        {{ order.address }}<br>
-                        {{ order.city }}, {{ order.postal_code }}<br>
-                        <abbr title="Email">E:</abbr> {{ order.email }}
-                    </address>
+                    <div class="delivery-address">
+                        <div class="address-header">
+                            <h6 class="recipient-name">{{ order.first_name }} {{ order.last_name }}</h6>
+                        </div>
+                        <div class="address-details">
+                            <p class="address-line">{{ order.address }}</p>
+                            <p class="address-line">{{ order.city }}, {{ order.postal_code }}</p>
+                            <p class="contact-info">
+                                <i class="fas fa-envelope me-2"></i>{{ order.email }}
+                            </p>
+                            {% if order.phone %}
+                            <p class="contact-info">
+                                <i class="fas fa-phone me-2"></i>{{ order.phone }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Order Details -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Details</h5>
+            <div class="card border-0 shadow-sm mb-4 details-card">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>Order Details
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-6">Order Date:</dt>
-                        <dd class="col-sm-6">{{ order.created|date:"M d, Y" }}</dd>
-                        
-                        <dt class="col-sm-6">Payment Status:</dt>
-                        <dd class="col-sm-6">
-                            {% if order.paid %}
-                                <span class="badge badge-success">Paid</span>
-                            {% else %}
-                                <span class="badge badge-warning">Pending</span>
-                            {% endif %}
-                        </dd>
-                        
+                    <div class="order-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Order Date</span>
+                            <span class="detail-value">{{ order.created|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Payment Status</span>
+                            <span class="detail-value">
+                                {% if order.paid %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </span>
+                        </div>
                         {% if order.transaction_id %}
-                            <dt class="col-sm-6">Transaction ID:</dt>
-                            <dd class="col-sm-6">{{ order.transaction_id }}</dd>
+                        <div class="detail-row">
+                            <span class="detail-label">Transaction ID</span>
+                            <span class="detail-value">{{ order.transaction_id }}</span>
+                        </div>
                         {% endif %}
-                    </dl>
+                        {% if order.payment_method %}
+                        <div class="detail-row">
+                            <span class="detail-label">Payment Method</span>
+                            <span class="detail-value">{{ order.payment_method }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
 
                     {% if order.note %}
-                        <hr>
-                        <h6>Order Notes:</h6>
-                        <p class="text-muted">{{ order.note }}</p>
+                        <div class="order-notes mt-3 pt-3 border-top">
+                            <h6 class="notes-title">Order Notes</h6>
+                            <p class="notes-content">{{ order.note }}</p>
+                        </div>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="card mt-3">
-                <div class="card-body text-center">
-                    {% if order.status == 'Delivered' %}
-                        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-block">
-                            <i class="fas fa-shopping-bag"></i> Shop Again
+            <div class="card border-0 shadow-sm actions-card">
+                <div class="card-body">
+                    <div class="action-buttons d-grid gap-2">
+                        {% if order.status == 'Delivered' %}
+                            <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-bag me-2"></i>Shop Again
+                            </a>
+                        {% elif order.status == 'Pending' and not order.paid %}
+                            <a href="{% url 'shop:payment_process' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>Complete Payment
+                            </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'shop:profile' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Orders
                         </a>
-                    {% elif order.status == 'Pending' and not order.paid %}
-                        <a href="{% url 'shop:payment_process' %}" class="btn btn-primary btn-block">
-                            <i class="fas fa-credit-card"></i> Complete Payment
-                        </a>
-                    {% endif %}
-                    
-                    <a href="{% url 'shop:profile' %}" class="btn btn-outline-secondary mt-2">
-                        <i class="fas fa-arrow-left"></i> Back to Orders
-                    </a>
+                        
+                        <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Order
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Custom Styles -->
 <style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 20px;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -30px;
-    top: 0;
-}
-
-.timeline-content {
-    padding-left: 10px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: -22px;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background: #dee2e6;
-}
+    .order-header-card {
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .order-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .order-status-badge {
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+    }
+    
+    .status-pending { background-color: #ffc107; color: #856404; }
+    .status-processing { background-color: #17a2b8; color: white; }
+    .status-shipped { background-color: #fd7e14; color: white; }
+    .status-delivered { background-color: #28a745; color: white; }
+    .status-cancelled { background-color: #dc3545; color: white; }
+    
+    .timeline-card, .tracking-card, .order-items-card, 
+    .delivery-card, .details-card, .actions-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-card:hover, .tracking-card:hover, .order-items-card:hover, 
+    .delivery-card:hover, .details-card:hover, .actions-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .order-timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+    
+    .order-timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+    }
+    
+    .timeline-step {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .timeline-step:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        background: white;
+        border: 3px solid #dee2e6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    
+    .timeline-step.completed .timeline-marker {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .timeline-step.current .timeline-marker {
+        border-color: #ffc107;
+        background: #ffc107;
+        color: #856404;
+        animation: pulse 2s infinite;
+    }
+    
+    .timeline-content {
+        padding-left: 1rem;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step-date {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    .step-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .tracking-info .tracking-detail {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .tracking-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    .tracking-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        margin: 0;
+    }
+    
+    .order-items {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .order-item {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f1f3f4;
+        transition: all 0.3s ease;
+    }
+    
+    .order-item:hover {
+        background-color: rgba(27, 184, 2, 0.05);
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .placeholder-image {
+        width: 100%;
+        height: 100%;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 1.5rem;
+    }
+    
+    .item-name {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-category, .item-brand {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .item-price, .item-quantity, .item-total {
+        text-align: center;
+    }
+    
+    .price-label, .quantity-label, .total-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .price-value, .quantity-value, .total-value {
+        font-weight: 600;
+        color: #495057;
+        font-size: 1rem;
+    }
+    
+    .order-summary {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .summary-row:last-child {
+        border-bottom: none;
+    }
+    
+    .summary-total {
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-top: 2px solid #dee2e6;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .summary-label {
+        color: #6c757d;
+    }
+    
+    .summary-value {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .summary-total .summary-label,
+    .summary-total .summary-value {
+        color: var(--primary-color);
+    }
+    
+    .delivery-address {
+        text-align: left;
+    }
+    
+    .recipient-name {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+    
+    .address-line {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-info {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-info i {
+        width: 16px;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .detail-value {
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .order-notes {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    
+    .notes-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .notes-content {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .action-buttons .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+    
+    @media (max-width: 768px) {
+        .order-timeline {
+            padding-left: 30px;
+        }
+        
+        .timeline-marker {
+            left: -30px;
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+        
+        .item-price, .item-quantity, .item-total {
+            text-align: left;
+            margin-top: 0.5rem;
+        }
+        
+        .order-summary {
+            margin-top: 1rem;
+        }
+        
+        .timeline-card:hover, .tracking-card:hover, .order-items-card:hover, 
+        .delivery-card:hover, .details-card:hover, .actions-card:hover {
+            transform: none;
+        }
+    }
 </style>
 {% endblock %}

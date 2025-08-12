@@ -1,31 +1,475 @@
 {% extends 'shop/base.html' %}
 {% block title %}Order Successful | E-Shop{% endblock %}
+
 {% block content %}
-<div class="text-center py-5">
-    <div class="mb-4">
-        <i class="fa fa-check-circle text-success" style="font-size: 4rem;"></i>
-    </div>
-    <h2 class="text-success mb-3">🎉 Order Placed Successfully!</h2>
-    <p class="lead mb-4">Thank you for your purchase. Your order has been confirmed and we'll start processing it right away.</p>
-    
-    <div class="card mx-auto" style="max-width: 500px;">
-        <div class="card-body">
-            <h5 class="card-title">Order #{{ order_id }}</h5>
-            <p class="card-text">You'll receive an email confirmation shortly with your order details.</p>
-            {% if user.is_authenticated %}
-                <a href="{% url 'shop:profile' %}" class="btn btn-primary me-2">View My Orders</a>
-                <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-success">View Impact</a>
-            {% else %}
-                <p class="small text-muted mt-3">
-                    <a href="{% url 'shop:login' %}">Log in</a> to view your order history and impact dashboard.
-                </p>
-                <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Continue Shopping</a>
-            {% endif %}
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <!-- Success Animation -->
+            <div class="success-animation text-center mb-4">
+                <div class="success-icon">
+                    <div class="success-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="success-celebration">
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Message -->
+            <div class="text-center mb-5">
+                <h1 class="success-title mb-3">🎉 Order Placed Successfully!</h1>
+                <p class="success-subtitle">Thank you for choosing our eco-friendly platform. Your order has been confirmed and we'll start processing it right away.</p>
+            </div>
+
+            <!-- Order Details Card -->
+            <div class="card border-0 shadow-lg success-card mb-4">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="order-number-badge">
+                            <span class="badge-label">Order Number</span>
+                            <span class="badge-value">#{{ order_id }}</span>
+                        </div>
+                    </div>
+
+                    <div class="success-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="detail-content">
+                                <h6 class="detail-title">Email Confirmation</h6>
+                                <p class="detail-description">You'll receive an email confirmation shortly with your order details and tracking information.</p>
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="detail-content">
+                                <h6 class="detail-title">Processing & Shipping</h6>
+                                <p class="detail-description">We'll start processing your order immediately. Estimated delivery time is 3-5 business days.</p>
+                            </div>
+                        </div>
+
+                        <div class="detail-item">
+                            <div class="detail-icon">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="detail-content">
+                                <h6 class="detail-title">Environmental Impact</h6>
+                                <p class="detail-description">Your purchase contributes to our sustainability goals. Check your impact dashboard for details.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons mt-4">
+                        {% if user.is_authenticated %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <a href="{% url 'shop:profile' %}" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-list me-2"></i>View My Orders
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-success btn-lg w-100">
+                                        <i class="fas fa-leaf me-2"></i>View Impact
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="guest-actions text-center">
+                                <div class="guest-message mb-3">
+                                    <p class="text-muted">
+                                        <a href="{% url 'shop:login' %}" class="text-primary">Log in</a> to view your order history and impact dashboard.
+                                    </p>
+                                </div>
+                                <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-shopping-cart me-2"></i>Continue Shopping
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card border-0 shadow-sm next-steps-card mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clipboard-list me-2 text-primary"></i>What's Next?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="next-steps">
+                        <div class="step-item">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h6 class="step-title">Order Processing</h6>
+                                <p class="step-description">We'll review and prepare your order for shipment within 24 hours.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h6 class="step-title">Shipping Notification</h6>
+                                <p class="step-description">You'll receive tracking information once your order is shipped.</p>
+                            </div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h6 class="step-title">Delivery & Feedback</h6>
+                                <p class="step-description">Enjoy your eco-friendly products and share your experience!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Actions -->
+            <div class="additional-actions text-center">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-info w-100" onclick="shareOrder()">
+                            <i class="fas fa-share me-2"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <div class="mt-4">
-        <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary">Back to Home</a>
-    </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .success-animation {
+        position: relative;
+        height: 120px;
+        margin-bottom: 2rem;
+    }
+    
+    .success-icon {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .success-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #20c997);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        animation: successPulse 0.8s ease-out;
+        box-shadow: 0 10px 30px rgba(27, 184, 2, 0.3);
+    }
+    
+    .success-celebration {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+    
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        animation: confettiFall 2s ease-out infinite;
+    }
+    
+    .confetti:nth-child(1) { left: 10%; background: #ffc107; animation-delay: 0s; }
+    .confetti:nth-child(2) { left: 30%; background: #28a745; animation-delay: 0.3s; }
+    .confetti:nth-child(3) { left: 50%; background: #17a2b8; animation-delay: 0.6s; }
+    .confetti:nth-child(4) { left: 70%; background: #fd7e14; animation-delay: 0.9s; }
+    .confetti:nth-child(5) { left: 90%; background: #e83e8c; animation-delay: 1.2s; }
+    
+    .success-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+    
+    .success-subtitle {
+        font-size: 1.2rem;
+        color: #6c757d;
+        line-height: 1.6;
+    }
+    
+    .success-card {
+        border-radius: 20px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    }
+    
+    .order-number-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 16px;
+        display: inline-block;
+    }
+    
+    .badge-label {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .badge-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .success-details {
+        margin: 2rem 0;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(27, 184, 2, 0.05);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .detail-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .detail-content {
+        flex: 1;
+    }
+    
+    .detail-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .detail-description {
+        color: #6c757d;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .action-buttons .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-3px);
+    }
+    
+    .guest-message {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .next-steps-card {
+        border-radius: 16px;
+    }
+    
+    .next-steps {
+        position: relative;
+    }
+    
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .step-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .step-item::after {
+        content: '';
+        position: absolute;
+        left: 22px;
+        top: 45px;
+        width: 2px;
+        height: calc(100% + 1.5rem);
+        background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+        opacity: 0.3;
+    }
+    
+    .step-item:last-child::after {
+        display: none;
+    }
+    
+    .step-number {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+    }
+    
+    .step-content {
+        flex: 1;
+        padding-top: 0.5rem;
+    }
+    
+    .step-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step-description {
+        color: #6c757d;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .additional-actions .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .additional-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    @keyframes successPulse {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes confettiFall {
+        0% {
+            transform: translateY(-100px) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(200px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .success-title {
+            font-size: 2rem;
+        }
+        
+        .success-subtitle {
+            font-size: 1rem;
+        }
+        
+        .order-number-badge {
+            padding: 1rem 1.5rem;
+        }
+        
+        .badge-value {
+            font-size: 1.2rem;
+        }
+        
+        .detail-item {
+            padding: 1rem;
+        }
+        
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .step-number {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .step-item::after {
+            left: 17px;
+        }
+        
+        .action-buttons .btn:hover,
+        .additional-actions .btn:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<script>
+    function shareOrder() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Order Successful!',
+                text: 'I just placed an order on this amazing eco-friendly platform!',
+                url: window.location.href
+            });
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            const text = 'I just placed an order on this amazing eco-friendly platform! ' + window.location.href;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+                alert('Link copied to clipboard!');
+            } else {
+                alert('Share feature not supported on this browser.');
+            }
+        }
+    }
+</script>
 {% endblock %}

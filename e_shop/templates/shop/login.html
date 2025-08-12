@@ -4,47 +4,217 @@
 {% block title %}Login - E-Shop{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Login to Your Account</h3>
-            </div>
-            <div class="card-body">
+<div class="auth-container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="auth-card">
+                <!-- Header Section -->
+                <div class="text-center mb-4">
+                    <div class="auth-icon mb-3">
+                        <i class="fas fa-user-circle fa-3x text-primary"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Welcome Back</h2>
+                    <p class="text-muted">Sign in to your eco-friendly account</p>
+                </div>
+
                 <!-- Google Sign-in Button -->
-                <div class="d-grid mb-3">
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-danger btn-lg">
+                <div class="social-login mb-4">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google w-100">
                         <i class="fab fa-google me-2"></i>
-                        Sign in with Google
+                        Continue with Google
                     </a>
                 </div>
                 
-                <div class="text-center mb-3">
-                    <span class="text-muted">or</span>
+                <!-- Divider -->
+                <div class="divider mb-4">
+                    <span class="divider-text">or</span>
                 </div>
 
-                <!-- Regular Login Form -->
-                <form method="post">
+                <!-- Login Form -->
+                <form method="post" class="auth-form">
                     {% csrf_token %}
-                    <div class="mb-3">
+                    
+                    <div class="form-group mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" 
-                               placeholder="Enter your username" required>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   placeholder="Enter your username" required>
+                        </div>
                     </div>
-                    <div class="mb-3">
+                    
+                    <div class="form-group mb-4">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" 
-                               placeholder="Enter your password" required>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   placeholder="Enter your password" required>
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
                     </div>
                 </form>
-                <div class="text-center mt-3">
-                    <p>Don't have an account? <a href="{% url 'shop:register' %}">Register here</a></p>
+                
+                <!-- Footer Links -->
+                <div class="auth-footer text-center">
+                    <p class="mb-2">
+                        <a href="#" class="text-decoration-none text-muted small">Forgot your password?</a>
+                    </p>
+                    <div class="signup-link">
+                        <span class="text-muted">Don't have an account? </span>
+                        <a href="{% url 'shop:register' %}" class="text-decoration-none fw-semibold">
+                            Create Account
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fffe 0%, #f0fdf4 100%);
+        margin: -2rem -15px 0;
+        padding: 3rem 15px;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #f1f5f9;
+    }
+    
+    .auth-icon {
+        animation: fadeInScale 0.6s ease-out;
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .btn-google {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        color: #374151;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-google:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+        color: #374151;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .divider {
+        position: relative;
+        text-align: center;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e5e7eb;
+    }
+    
+    .divider-text {
+        background: white;
+        padding: 0 1rem;
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+    
+    .input-group-text {
+        background: #f8f9fa;
+        border-color: #e5e7eb;
+        color: #6b7280;
+    }
+    
+    .form-control {
+        border-color: #e5e7eb;
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(27, 184, 2, 0.1);
+    }
+    
+    .toggle-password {
+        border-left: none;
+    }
+    
+    .auth-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .signup-link a {
+        color: var(--primary-color);
+    }
+    
+    .signup-link a:hover {
+        color: var(--primary-dark);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-container {
+            padding: 2rem 15px;
+        }
+        
+        .auth-card {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    // Toggle password visibility
+    document.querySelector('.toggle-password')?.addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const icon = this.querySelector('i');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            passwordField.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    });
+</script>
+
 {% endblock %}

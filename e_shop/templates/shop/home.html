@@ -3,121 +3,258 @@
 {% block title %}Home - E-Shop{% endblock %}
 
 {% block content %}
-<section class="p-5 rounded-3 mb-5" style="background:linear-gradient(115deg,#1B5E20,#2E7D32);color:#fff;position:relative;overflow:hidden;">
-    <div class="row align-items-center">
-        <div class="col-lg-7">
-            <h1 class="fw-bold display-5 mb-3">Sustainable Shopping, Simplified.</h1>
-            <p class="lead mb-4">Discover ethically sourced products, track your carbon impact, and earn eco badges while you shop.</p>
-            {% if not user.is_authenticated %}
-                <a href="{% url 'shop:register' %}" class="btn btn-light btn-lg me-2">Get Started</a>
-                <a href="{% url 'shop:product_list' %}" class="btn btn-outline-light btn-lg">Browse Products</a>
-            {% else %}
-                <a href="{% url 'shop:product_list' %}" class="btn btn-light btn-lg me-2">Continue Shopping</a>
-                <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-outline-light btn-lg">My Impact</a>
-            {% endif %}
-        </div>
-        <div class="col-lg-5 d-none d-lg-block">
-            <div class="bg-white text-dark rounded-4 shadow p-4">
-                <h6 class="text-uppercase small fw-bold text-success mb-3">Your Eco Snapshot</h6>
-                {% if user.is_authenticated and user.impact_summary %}
-                    <div class="d-flex justify-content-between small mb-2"><span>Total Saved</span><strong>{{ user.impact_summary.total_saved_kg }} kg</strong></div>
-                    <div class="d-flex justify-content-between small mb-2"><span>This Month</span><strong>{{ user.impact_summary.current_month_carbon_kg }} kg</strong></div>
-                    <div class="d-flex justify-content-between small mb-2"><span>Low Impact Streak</span><strong>{{ user.impact_summary.low_impact_streak }} days</strong></div>
-                    <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-success btn-sm mt-2 w-100">View Full Dashboard</a>
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="row align-items-center py-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                Sustainable Shopping,<br>
+                <span class="text-dark">Simplified.</span>
+            </h1>
+            <p class="lead text-muted mb-4">
+                Discover ethically sourced products, track your carbon impact, 
+                and earn eco badges while you shop responsibly.
+            </p>
+            
+            <div class="d-flex flex-wrap gap-3 mb-4">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'shop:register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                    </a>
                 {% else %}
-                    <p class="small mb-3">Create an account to start tracking your carbon savings and earn achievement badges.</p>
-                    <ul class="small ps-3 mb-3">
-                        <li>Track CO₂e saved automatically</li>
-                        <li>Set monthly carbon budgets</li>
-                        <li>Earn eco achievement badges</li>
-                    </ul>
-                    <a href="{% url 'shop:register' %}" class="btn btn-success btn-sm w-100">Create Free Account</a>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                    </a>
+                    <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>My Impact
+                    </a>
                 {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="eco-snapshot-card">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary text-white rounded-circle p-2 me-3">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h6 class="fw-bold mb-0 text-primary">Your Eco Snapshot</h6>
+                        </div>
+                        
+                        {% if user.is_authenticated and user.impact_summary %}
+                            <div class="eco-stats">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <div class="h5 fw-bold text-primary mb-1">{{ user.impact_summary.total_saved_kg|floatformat:1 }}</div>
+                                            <small class="text-muted">kg CO₂ Saved</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <div class="h5 fw-bold text-success mb-1">{{ user.impact_summary.low_impact_streak }}</div>
+                                            <small class="text-muted">Day Streak</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="{% url 'shop:impact_dashboard' %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-chart-line me-2"></i>View Full Dashboard
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-seedling text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <p class="text-muted mb-3">Start tracking your environmental impact today</p>
+                                <ul class="list-unstyled small text-start mb-3">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-primary me-2"></i>
+                                        Track CO₂e saved automatically
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-primary me-2"></i>
+                                        Set monthly carbon budgets
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-primary me-2"></i>
+                                        Earn eco achievement badges
+                                    </li>
+                                </ul>
+                                <a href="{% url 'shop:register' %}" class="btn btn-primary w-100">
+                                    <i class="fas fa-user-plus me-2"></i>Create Free Account
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Featured Products -->
-<section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="h5 mb-0">Featured Products</h3>
-        <a href="{% url 'shop:product_list' %}" class="small text-decoration-none">View all →</a>
+<section class="featured-products mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="h4 fw-bold text-dark mb-1">Featured Products</h3>
+            <p class="text-muted mb-0">Discover our eco-friendly selection</p>
+        </div>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary">
+            View All <i class="fas fa-arrow-right ms-1"></i>
+        </a>
     </div>
-    <div class="row g-3">
+    
+    <div class="row g-4">
         {% for p in featured_products %}
-        <div class="col-6 col-md-3">
-            <div class="card h-100 border-0 shadow-sm">
-                {% if p.image %}
-                    <a href="{% url 'shop:product_detail' p.slug %}"><img src="{{ p.image.url }}" class="card-img-top" style="object-fit:cover;height:150px" alt="{{ p.name }}"></a>
-                {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:150px;font-size:.8rem;">No Image</div>
-                {% endif %}
-                <div class="card-body p-2 d-flex flex-column">
-                    <a href="{% url 'shop:product_detail' p.slug %}" class="fw-semibold small text-decoration-none mb-1">{{ p.name|truncatechars:40 }}</a>
-                    <div class="small text-muted mb-1">${{ p.price }} • {{ p.average_rating|floatformat:1 }}★</div>
-                    <span class="badge badge-impact mb-2">{{ p.effective_carbon_kg }} kg CO₂e</span>
-                    <a href="{% url 'shop:product_detail' p.slug %}" class="btn btn-sm btn-primary mt-auto">View</a>
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="position-relative">
+                        {% if p.image %}
+                            <img src="{{ p.image.url }}" class="card-img-top" 
+                                 style="object-fit: cover; height: 200px;" alt="{{ p.name }}">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center text-muted" 
+                                 style="height: 200px;">
+                                <i class="fas fa-image fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="carbon-badge">
+                                <i class="fas fa-leaf me-1"></i>{{ p.effective_carbon_kg|floatformat:1 }} kg
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-3">
+                        <h6 class="card-title fw-semibold mb-2">
+                            <a href="{% url 'shop:product_detail' p.slug %}" 
+                               class="text-decoration-none text-dark">
+                                {{ p.name|truncatechars:50 }}
+                            </a>
+                        </h6>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="h6 text-primary fw-bold mb-0">${{ p.price }}</span>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star text-warning me-1" style="font-size: 0.8rem;"></i>
+                                <small class="text-muted">{{ p.average_rating|floatformat:1 }}</small>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'shop:product_detail' p.slug %}" 
+                           class="btn btn-primary w-100 btn-sm">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-            <p class="text-muted small">No featured products yet.</p>
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-bag text-muted fa-3x mb-3"></i>
+                    <p class="text-muted">No featured products available yet.</p>
+                </div>
+            </div>
         {% endfor %}
     </div>
 </section>
 
 <!-- Categories -->
-<section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="h5 mb-0">Shop by Category</h3>
+<section class="categories-section mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="h4 fw-bold text-dark mb-1">Shop by Category</h3>
+            <p class="text-muted mb-0">Find products that match your lifestyle</p>
+        </div>
     </div>
+    
     <div class="row g-3">
         {% for c in categories %}
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
             <a href="{% url 'shop:product_list_by_category' c.slug %}" class="text-decoration-none">
-                <div class="border rounded text-center p-3 bg-white h-100 hover-shadow">
-                    <div class="fw-semibold small mb-1">{{ c.name }}</div>
-                    <div class="text-muted tiny">{{ c.products.count }} items</div>
+                <div class="category-card">
+                    <div class="card border-0 shadow-sm h-100 text-center">
+                        <div class="card-body p-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-box text-primary fa-lg"></i>
+                            </div>
+                            <h6 class="fw-semibold text-dark mb-1">{{ c.name }}</h6>
+                            <small class="text-muted">{{ c.products.count }} items</small>
+                        </div>
+                    </div>
                 </div>
             </a>
         </div>
         {% empty %}
-            <p class="text-muted small">No categories created.</p>
+            <div class="col-12">
+                <div class="text-center py-4">
+                    <i class="fas fa-tags text-muted fa-2x mb-2"></i>
+                    <p class="text-muted">No categories available yet.</p>
+                </div>
+            </div>
         {% endfor %}
     </div>
 </section>
 
 {% if user.is_authenticated %}
-<section class="mb-5">
-    <h3 class="h5 mb-3">Quick Access</h3>
-    <div class="row g-3">
+<!-- Quick Access -->
+<section class="quick-access-section mb-5">
+    <div class="mb-4">
+        <h3 class="h4 fw-bold text-dark mb-1">Quick Access</h3>
+        <p class="text-muted mb-0">Shortcuts to your favorite features</p>
+    </div>
+    
+    <div class="row g-4">
         <div class="col-md-4">
             <a href="{% url 'shop:cart_detail' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="fw-bold mb-2"><i class="fa fa-shopping-cart me-2 text-success"></i>My Cart</h6>
-                        <p class="small text-muted mb-0">Review and adjust your selections.</p>
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-shopping-cart text-primary fa-lg"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">My Cart</h6>
+                        <p class="text-muted mb-0 small">Review and adjust your selections</p>
                     </div>
                 </div>
             </a>
         </div>
+        
         <div class="col-md-4">
             <a href="{% url 'shop:profile' %}?tab=orders" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="fw-bold mb-2"><i class="fa fa-box me-2 text-success"></i>Order History</h6>
-                        <p class="small text-muted mb-0">Track your past purchases & status.</p>
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-success bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-box text-success fa-lg"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Order History</h6>
+                        <p class="text-muted mb-0 small">Track your past purchases & status</p>
                     </div>
                 </div>
             </a>
         </div>
+        
         <div class="col-md-4">
             <a href="{% url 'shop:impact_dashboard' %}" class="text-decoration-none">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body d-flex flex-column">
-                        <h6 class="fw-bold mb-2"><i class="fa fa-leaf me-2 text-success"></i>Impact Dashboard</h6>
-                        <p class="small text-muted mb-0">Budget, savings & badges overview.</p>
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-warning bg-opacity-10 rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-leaf text-warning fa-lg"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Impact Dashboard</h6>
+                        <p class="text-muted mb-0 small">Budget, savings & badges overview</p>
                     </div>
                 </div>
             </a>
@@ -126,8 +263,137 @@
 </section>
 {% endif %}
 
+<!-- Custom Styles -->
 <style>
-    .hover-shadow:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-2px);transition:.25s}
-    .tiny{font-size:.65rem;letter-spacing:.5px;text-transform:uppercase}
+    .hero-section {
+        background: linear-gradient(135deg, 
+            rgba(27, 184, 2, 0.08) 0%, 
+            rgba(255, 255, 255, 1) 25%, 
+            rgba(248, 255, 254, 1) 50%, 
+            rgba(240, 253, 244, 1) 75%, 
+            rgba(27, 184, 2, 0.12) 100%);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(27, 184, 2, 0.1);
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(27, 184, 2, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -30%;
+        width: 60%;
+        height: 60%;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    
+    .hero-section .row {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-section .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #15803d 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(27, 184, 2, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .hero-section .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(27, 184, 2, 0.4);
+        background: linear-gradient(135deg, #15803d 0%, var(--primary-color) 100%);
+    }
+    
+    .hero-section .btn-outline-primary {
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .hero-section .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(27, 184, 2, 0.3);
+    }
+    
+    .eco-snapshot-card .card {
+        border: 2px solid #e8f5e8;
+        transition: all 0.3s ease;
+    }
+    
+    .eco-snapshot-card .card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+    
+    .product-card .card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .product-card .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .category-card .card {
+        transition: all 0.3s ease;
+    }
+    
+    .category-card .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .carbon-badge {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-4px);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 1.5rem 1rem;
+        }
+        
+        .display-4 {
+            font-size: 2rem;
+        }
+        
+        .btn-lg {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 {% endblock %}

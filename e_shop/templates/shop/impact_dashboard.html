@@ -1,163 +1,209 @@
 {% extends 'shop/base.html' %}
-{% block title %}Impact Dashboard{% endblock %}
 
-{% block extra_css %}
-<style>
-  .impact-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
-  }
-  .equivalent-item {
-    text-align: center;
-    padding: 1rem;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
-  }
-  .progress-ring {
-    transform: rotate(-90deg);
-  }
-  .badge-earned {
-    animation: bounce 2s infinite;
-  }
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); }
-    60% { transform: translateY(-5px); }
-  }
-</style>
-{% endblock %}
+{% block title %}Impact Dashboard - E-Shop{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">🌱 Your Environmental Impact Dashboard</h2>
-    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#simulatorModal">
-      <i class="fas fa-seedling"></i> Impact Simulator
-    </button>
-  </div>
-
-  <!-- Environmental Impact Story -->
-  {% if impact_story %}
-  <div class="card impact-card mb-4">
-    <div class="card-body text-center py-5">
-      <h3 class="card-title">{{ impact_story.story }}</h3>
-      
-      {% if impact_story.equivalents %}
-      <div class="row g-3 mt-4">
-        {% for equiv in impact_story.equivalents|slice:":4" %}
-        <div class="col-md-3 col-6">
-          <div class="equivalent-item">
-            <div class="h1 mb-2">{{ equiv.icon }}</div>
-            <div class="h4 mb-1">{{ equiv.value }}</div>
-            <div class="small opacity-75">{{ equiv.unit }}</div>
-            <div class="small opacity-50">{{ equiv.metric }}</div>
-          </div>
+<!-- Dashboard Header -->
+<div class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fas fa-leaf me-2 text-primary"></i>Environmental Impact Dashboard
+            </h2>
+            <p class="text-muted mb-0">Track your eco-friendly shopping journey</p>
         </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-      
-      <!-- Progress to next milestone -->
-      <div class="mt-4">
-        <p class="mb-2">Progress to next milestone ({{ impact_story.next_milestone }}kg CO₂ saved)</p>
-        <div class="progress" style="height: 10px;">
-          <div class="progress-bar bg-warning" style="width: {{ impact_story.progress_to_next }}%"></div>
-        </div>
-        <small class="opacity-75">{{ impact_story.progress_to_next|floatformat:1 }}% complete</small>
-      </div>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#simulatorModal">
+            <i class="fas fa-calculator me-2"></i>Impact Simulator
+        </button>
     </div>
-  </div>
-  {% endif %}
+</div>
 
-  <div class="row g-4">
-    <!-- Summary Card -->
-    <div class="col-md-4">
-      <div class="card h-100">
-        <div class="card-header bg-success text-white">
-          <h6 class="mb-0"><i class="fas fa-chart-line"></i> Impact Summary</h6>
-        </div>
-        <div class="card-body">
-          {% if impact %}
-            <div class="row g-3">
-              <div class="col-6 text-center">
-                <div class="h4 text-danger">{{ impact.total_carbon_kg }}</div>
-                <small class="text-muted">Total Carbon (kg)</small>
-              </div>
-              <div class="col-6 text-center">
-                <div class="h4 text-success">{{ impact.total_saved_kg }}</div>
-                <small class="text-muted">Total Saved (kg)</small>
-              </div>
-              <div class="col-12">
-                <hr>
-                <div class="d-flex justify-content-between">
-                  <span>This Month:</span>
-                  <span class="badge {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning text-dark{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}">
-                    {{ impact.current_month_carbon_kg }}/{{ impact.month_budget_kg }}kg
-                  </span>
+<!-- Impact Story Hero Section -->
+{% if impact_story %}
+<div class="impact-hero mb-5">
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="hero-background">
+            <div class="card-body text-center py-5 position-relative">
+                <div class="hero-content">
+                    <h3 class="display-6 fw-bold text-white mb-4">{{ impact_story.story }}</h3>
+                    
+                    <!-- Environmental Equivalents -->
+                    {% if impact_story.equivalents %}
+                    <div class="row g-4 mt-4">
+                        {% for equiv in impact_story.equivalents|slice:":4" %}
+                        <div class="col-6 col-md-3">
+                            <div class="equivalent-card">
+                                <div class="equivalent-icon mb-3">{{ equiv.icon }}</div>
+                                <div class="equivalent-value h4 fw-bold mb-1">{{ equiv.value }}</div>
+                                <div class="equivalent-unit"{{ equiv.unit }}</div>
+                                <small class="equivalent-metric">{{ equiv.metric }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Progress to Next Milestone -->
+                    <div class="milestone-progress mt-5">
+                        <h6 class="text-white mb-3">Progress to {{ impact_story.next_milestone }}kg CO₂ saved</h6>
+                        <div class="progress mb-2" style="height: 12px;">
+                            <div class="progress-bar bg-warning" 
+                                 style="width: {{ impact_story.progress_to_next }}%"
+                                 role="progressbar">
+                            </div>
+                        </div>
+                        <small class="text-white opacity-75">{{ impact_story.progress_to_next|floatformat:1 }}% complete</small>
+                    </div>
                 </div>
-              </div>
             </div>
-          {% else %}
-            <div class="text-center text-muted">
-              <i class="fas fa-seedling fa-3x mb-3"></i>
-              <p>Start your environmental journey by making your first eco-friendly purchase!</p>
-            </div>
-          {% endif %}
-          
-          <hr>
-          <h6 class="fw-bold">Set Monthly Budget</h6>
-          <form method="post" action="{% url 'shop:set_budget' %}" class="d-flex gap-2">
-            {% csrf_token %}
-            {{ budget_form.month_budget_kg }}
-            <button class="btn btn-primary btn-sm">Save</button>
-          </form>
         </div>
-      </div>
     </div>
+</div>
+{% endif %}
 
-    <!-- Badges Card -->
-    <div class="col-md-4">
-      <div class="card h-100">
-        <div class="card-header bg-warning text-dark">
-          <h6 class="mb-0"><i class="fas fa-medal"></i> Your Achievements</h6>
-        </div>
-        <div class="card-body">
-          {% if user_badges %}
-            <div class="row g-2">
-              {% for ub in user_badges %}
-              <div class="col-6">
-                <div class="badge-earned badge bg-success p-2 w-100 text-center">
-                  <div>{{ ub.badge.icon|default:"🏆" }}</div>
-                  <small>{{ ub.badge.name }}</small>
+<!-- Dashboard Stats Grid -->
+<div class="row g-4 mb-5">
+    <!-- Impact Summary -->
+    <div class="col-lg-4">
+        <div class="stats-card h-100">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-success text-white">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="fas fa-chart-line me-2"></i>Impact Summary
+                    </h6>
                 </div>
-              </div>
-              {% endfor %}
+                <div class="card-body p-4">
+                    {% if impact %}
+                        <div class="impact-stats">
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <div class="stat-value h3 text-danger mb-1">{{ impact.total_carbon_kg|floatformat:1 }}</div>
+                                        <div class="stat-label small text-muted">Total Carbon (kg)</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item text-center">
+                                        <div class="stat-value h3 text-success mb-1">{{ impact.total_saved_kg|floatformat:1 }}</div>
+                                        <div class="stat-label small text-muted">Total Saved (kg)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Monthly Budget Status -->
+                            <div class="budget-status mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold">This Month</span>
+                                    <span class="badge budget-badge {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning text-dark{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ impact.current_month_carbon_kg|floatformat:1 }}/{{ impact.month_budget_kg|floatformat:1 }}kg
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar {% if budget_status == 'green' %}bg-success{% elif budget_status == 'amber' %}bg-warning{% elif budget_status == 'red' %}bg-danger{% else %}bg-secondary{% endif %}" 
+                                         style="width: {% widthratio impact.current_month_carbon_kg impact.month_budget_kg 100 %}%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state text-center py-4">
+                            <i class="fas fa-seedling fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">Start Your Journey</h6>
+                            <p class="text-muted small">Make your first eco-friendly purchase to begin tracking your environmental impact!</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Budget Setting Form -->
+                    <div class="budget-form mt-4 pt-4 border-top">
+                        <h6 class="fw-semibold mb-3">Set Monthly Budget</h6>
+                        <form method="post" action="{% url 'shop:set_budget' %}" class="d-flex gap-2">
+                            {% csrf_token %}
+                            <div class="flex-fill">
+                                {{ budget_form.month_budget_kg }}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-          {% else %}
-            <div class="text-center text-muted">
-              <i class="fas fa-trophy fa-3x mb-3"></i>
-              <p>Start earning badges by making eco-friendly choices!</p>
-              <small>Available badges: Tree Planter, Eco Warrior, Carbon Hero</small>
-            </div>
-          {% endif %}
         </div>
-      </div>
     </div>
 
-    <!-- Recent Orders -->
-    <div class="col-md-4">
-      <div class="card h-100">
-        <div class="card-header bg-info text-white">
-          <h6 class="mb-0"><i class="fas fa-history"></i> Recent Impact</h6>
+    <!-- Achievements -->
+    <div class="col-lg-4">
+        <div class="achievements-card h-100">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-warning text-dark">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="fas fa-trophy me-2"></i>Your Achievements
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if user_badges %}
+                        <div class="badges-grid">
+                            <div class="row g-3">
+                                {% for ub in user_badges %}
+                                <div class="col-6">
+                                    <div class="badge-item">
+                                        <div class="badge-card text-center p-3 rounded">
+                                            <div class="badge-icon mb-2">{{ ub.badge.icon|default:"🏆" }}</div>
+                                            <div class="badge-name small fw-semibold">{{ ub.badge.name }}</div>
+                                            <div class="badge-date tiny text-muted">{{ ub.earned_at|date:"M j" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Badge Progress -->
+                        <div class="badge-progress mt-4 pt-3 border-top">
+                            <small class="text-muted d-block mb-2">Available Achievements</small>
+                            <div class="available-badges">
+                                <span class="badge bg-light text-dark me-1">🌱 Tree Planter</span>
+                                <span class="badge bg-light text-dark me-1">🛡️ Eco Warrior</span>
+                                <span class="badge bg-light text-dark">🦸 Carbon Hero</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state text-center py-4">
+                            <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">Earn Your First Badge</h6>
+                            <p class="text-muted small mb-3">Complete eco-friendly actions to unlock achievements</p>
+                            <div class="upcoming-badges">
+                                <div class="badge bg-light text-dark me-1 mb-1">🌱 Tree Planter</div>
+                                <div class="badge bg-light text-dark me-1 mb-1">🛡️ Eco Warrior</div>
+                                <div class="badge bg-light text-dark mb-1">🦸 Carbon Hero</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-          <div class="table-responsive" style="max-height: 200px;">
-            <table class="table table-sm">
-              <thead>
-                <tr><th>Order</th><th>Carbon</th><th>Saved</th></tr>
-              </thead>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-4">
+        <div class="activity-card h-100">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-gradient-info text-white">
+                    <h6 class="mb-0 fw-semibold">
+                        <i class="fas fa-history me-2"></i>Recent Impact
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="activity-list">
+                        <div class="table-responsive" style="max-height: 250px;">
+                            <table class="table table-sm table-borderless">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="fw-semibold">Order</th>
+                                        <th class="fw-semibold text-center">Carbon</th>
+                                        <th class="fw-semibold text-center">Saved</th>
+                                    </tr>
+                                </thead>
               <tbody>
                 {% for oi in recent_impacts %}
                 <tr>
@@ -355,4 +401,192 @@ function displaySimulationResults(simulation) {
   document.getElementById('simulationResults').style.display = 'block';
 }
 </script>
+
+<!-- Custom Styles -->
+<style>
+    .hero-background {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        position: relative;
+    }
+    
+    .hero-background::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+        opacity: 0.3;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .equivalent-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem 1rem;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .equivalent-card:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-5px);
+    }
+    
+    .equivalent-icon {
+        font-size: 2rem;
+    }
+    
+    .equivalent-value {
+        color: white;
+    }
+    
+    .equivalent-unit, .equivalent-metric {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745, #20c997) !important;
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #17a2b8, #007bff) !important;
+    }
+    
+    .stats-card, .achievements-card, .activity-card {
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover, .achievements-card:hover, .activity-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-item {
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-item:hover {
+        background: #e9ecef;
+        transform: scale(1.05);
+    }
+    
+    .budget-badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .badge-item {
+        transition: all 0.3s ease;
+    }
+    
+    .badge-card {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .badge-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge-icon {
+        font-size: 1.5rem;
+    }
+    
+    .badge-name {
+        color: #495057;
+    }
+    
+    .badge-date {
+        color: #6c757d;
+        font-size: 0.7rem;
+    }
+    
+    .available-badges .badge {
+        margin: 0.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .available-badges .badge:hover {
+        background: var(--primary-light) !important;
+        color: var(--primary-dark) !important;
+        transform: scale(1.1);
+    }
+    
+    .empty-state {
+        opacity: 0.7;
+    }
+    
+    .milestone-progress .progress {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+    }
+    
+    .milestone-progress .progress-bar {
+        background: #ffc107;
+        border-radius: 6px;
+    }
+    
+    .activity-list .table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .activity-list .table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .budget-form .form-control {
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .budget-form .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(27, 184, 2, 0.25);
+    }
+    
+    .tiny {
+        font-size: 0.7rem;
+    }
+    
+    @media (max-width: 768px) {
+        .equivalent-card {
+            padding: 1rem 0.5rem;
+        }
+        
+        .equivalent-icon {
+            font-size: 1.5rem;
+        }
+        
+        .hero-content h3 {
+            font-size: 1.5rem;
+        }
+        
+        .stats-card:hover, .achievements-card:hover, .activity-card:hover {
+            transform: none;
+        }
+    }
+</style>
+
 {% endblock %}

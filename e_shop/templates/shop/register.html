@@ -4,75 +4,317 @@
 {% block title %}Register - E-Shop{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-center">Create Your Account</h3>
-            </div>
-            <div class="card-body">
+<div class="auth-container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="auth-card">
+                <!-- Header Section -->
+                <div class="text-center mb-4">
+                    <div class="auth-icon mb-3">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-2">Join E-Shop</h2>
+                    <p class="text-muted">Create your eco-friendly shopping account</p>
+                </div>
+
                 <!-- Google Sign-up Button -->
-                <div class="d-grid mb-3">
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-danger btn-lg">
+                <div class="social-login mb-4">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google w-100">
                         <i class="fab fa-google me-2"></i>
                         Sign up with Google
                     </a>
                 </div>
                 
-                <div class="text-center mb-3">
-                    <span class="text-muted">or</span>
+                <!-- Divider -->
+                <div class="divider mb-4">
+                    <span class="divider-text">or create with email</span>
                 </div>
 
-                <!-- Regular Registration Form -->
-                <form method="post">
+                <!-- Registration Form -->
+                <form method="post" class="auth-form">
                     {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    
+                    <!-- Name Fields -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
                             <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
-                            {{ form.first_name }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
+                                {{ form.first_name }}
+                            </div>
+                            {% if form.first_name.errors %}
+                                <div class="field-error">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-6">
                             <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
-                            {{ form.last_name }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user text-muted"></i>
+                                </span>
+                                {{ form.last_name }}
+                            </div>
+                            {% if form.last_name.errors %}
+                                <div class="field-error">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="mb-3">
+                    
+                    <!-- Username Field -->
+                    <div class="form-group mb-3">
                         <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                        {{ form.username }}
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-at text-muted"></i>
+                            </span>
+                            {{ form.username }}
+                        </div>
                         {% if form.username.errors %}
-                            <div class="text-danger">{{ form.username.errors }}</div>
+                            <div class="field-error">{{ form.username.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                        {{ form.email }}
+                    
+                    <!-- Email Field -->
+                    <div class="form-group mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope text-muted"></i>
+                            </span>
+                            {{ form.email }}
+                        </div>
                         {% if form.email.errors %}
-                            <div class="text-danger">{{ form.email.errors }}</div>
+                            <div class="field-error">{{ form.email.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <div class="mb-3">
+                    
+                    <!-- Password Fields -->
+                    <div class="form-group mb-3">
                         <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                        {{ form.password1 }}
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            {{ form.password1 }}
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password1">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         {% if form.password1.errors %}
-                            <div class="text-danger">{{ form.password1.errors }}</div>
+                            <div class="field-error">{{ form.password1.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <div class="mb-3">
+                    
+                    <div class="form-group mb-4">
                         <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                        {{ form.password2 }}
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock text-muted"></i>
+                            </span>
+                            {{ form.password2 }}
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                         {% if form.password2.errors %}
-                            <div class="text-danger">{{ form.password2.errors }}</div>
+                            <div class="field-error">{{ form.password2.errors.0 }}</div>
                         {% endif %}
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">Create Account</button>
+                    
+                    <!-- Terms & Conditions -->
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="terms" required>
+                        <label class="form-check-label small" for="terms">
+                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> 
+                            and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
                     </div>
                 </form>
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="{% url 'shop:login' %}">Login here</a></p>
+                
+                <!-- Footer Links -->
+                <div class="auth-footer text-center">
+                    <div class="signin-link">
+                        <span class="text-muted">Already have an account? </span>
+                        <a href="{% url 'shop:login' %}" class="text-decoration-none fw-semibold">
+                            Sign In
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Custom Styles -->
+<style>
+    .auth-container {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, #f8fffe 0%, #f0fdf4 100%);
+        margin: -2rem -15px 0;
+        padding: 3rem 15px;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border: 1px solid #f1f5f9;
+        max-width: 100%;
+    }
+    
+    .auth-icon {
+        animation: fadeInScale 0.6s ease-out;
+    }
+    
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .btn-google {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        color: #374151;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-google:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+        color: #374151;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .divider {
+        position: relative;
+        text-align: center;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e5e7eb;
+    }
+    
+    .divider-text {
+        background: white;
+        padding: 0 1rem;
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+    
+    .input-group-text {
+        background: #f8f9fa;
+        border-color: #e5e7eb;
+        color: #6b7280;
+    }
+    
+    .form-control {
+        border-color: #e5e7eb;
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(27, 184, 2, 0.1);
+    }
+    
+    .toggle-password {
+        border-left: none;
+    }
+    
+    .field-error {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .auth-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    
+    .signin-link a {
+        color: var(--primary-color);
+    }
+    
+    .signin-link a:hover {
+        color: var(--primary-dark);
+    }
+    
+    @media (max-width: 768px) {
+        .auth-container {
+            padding: 2rem 15px;
+        }
+        
+        .auth-card {
+            padding: 2rem 1.5rem;
+        }
+        
+        .row.g-3 > .col-6 {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const target = this.getAttribute('data-target');
+            const passwordField = document.getElementById(`id_${target}`);
+            const icon = this.querySelector('i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordField.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        });
+    });
+    
+    // Form validation feedback
+    document.querySelector('.auth-form').addEventListener('submit', function(e) {
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('Passwords do not match!');
+        }
+    });
+</script>
+
 {% endblock %}

@@ -4,60 +4,572 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}E-Shop{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --green-dark:#1B5E20; --green:#2E7D32; --green-light:#A5D6A7; --bg:#F8FFF9; --white:#FFFFFF; }
-        body { background: var(--bg); color:#233; font-family: system-ui, Arial, sans-serif; }
-        .navbar { background: var(--green-dark)!important; }
-        a, .nav-link { color: var(--green-dark); }
-        .btn-primary, .btn-success { background: var(--green); border-color: var(--green); }
-        .btn-primary:hover, .btn-success:hover { background: var(--green-dark); border-color: var(--green-dark); }
-        .card { border:1px solid #e3eee4; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-        .card-header { background: var(--green); color: var(--white); }
-        footer { background: var(--green-dark)!important; }
-        .badge-impact { background: var(--green-light); color:#0f3e11; font-weight:500; }
-        .impact-alt { font-size:.9rem; color:#2E7D32; }
-        .table > :not(caption) > * > * { background: var(--white); }
-        .progress-bar { background: var(--green); }
-        .link-muted { color:#4f6650; }
-        
-        /* Carbon Intelligence Styles */
-        .carbon-badge {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+        /* ================= Modern Design System Variables ================= */
+        :root {
+            --primary-color: #1BB802;
+            --primary-dark: #158a01;
+            --primary-light: #e8f5e8;
+            --primary-ultra-light: #f4faf4;
+            
+            --secondary-color: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            
+            --border-color: #e5e7eb;
+            --border-light: #f3f4f6;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.15s ease;
+            --transition-spring: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
+
+        /* ================= Base Styles ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        /* ================= Container & Layout ================= */
+        .container {
+            max-width: 1200px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding-top: 2rem;
+        }
+
+        /* ================= Navigation ================= */
+        .navbar {
+            background: var(--secondary-color) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #f1f5f9;
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            min-height: 70px;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.75rem;
+            color: var(--primary-color) !important;
+            text-decoration: none;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary-dark) !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 500;
+            padding: 0.5rem 0.75rem !important;
+            border-radius: var(--radius-md);
+            transition: var(--transition-fast);
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: var(--primary-ultra-light);
+            color: var(--primary-color) !important;
+        }
+
+        .navbar-nav .nav-link i {
+            margin-right: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+            font-size: 0.9rem;
+        }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            background: var(--secondary-color);
+            min-width: 220px;
+        }
+
+        .dropdown-item {
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            transition: var(--transition-fast);
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-ultra-light);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            margin-right: 0.75rem;
+        }
+
+        .dropdown-divider {
+            border-color: var(--border-light);
+            margin: 0.5rem 0;
+        }
+
+        /* Badge Styles */
+        .badge {
+            font-weight: 600;
+            border-radius: 20px;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.025em;
+        }
+
+        .badge.bg-success {
+            background-color: var(--primary-color) !important;
+            color: white;
+        }
+
+        .badge.bg-danger {
+            background-color: #ef4444 !important;
+            color: white;
+        }
+
+        .badge.bg-warning {
+            background-color: #f59e0b !important;
+            color: white;
+        }
+
+        /* ================= Buttons ================= */
+        .btn {
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            padding: 0.6rem 1.25rem;
+            border: none;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-lg {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary, .btn-success {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(27, 184, 2, 0.2);
+        }
+
+        .btn-primary:hover, .btn-success:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(27, 184, 2, 0.3);
+            color: white;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-light {
+            background: var(--secondary-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-light:hover {
+            background: var(--border-light);
+            transform: translateY(-1px);
+            color: var(--text-primary);
+        }
+
+        /* ================= Cards ================= */
+        .card {
+            border: 1px solid #f1f5f9;
+            border-radius: var(--radius-lg);
+            background: var(--secondary-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .card-header {
+            background: var(--primary-ultra-light);
+            color: var(--text-primary);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-footer {
+            background: #fafbfc;
+            border-top: 1px solid #f1f5f9;
+            padding: 1rem 1.5rem;
+        }
+
+        /* ================= Forms ================= */
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            transition: var(--transition-fast);
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(27, 184, 2, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* ================= Alerts ================= */
+        .alert {
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        /* ================= Tables ================= */
+        .table {
+            background: var(--secondary-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table th {
+            background: var(--primary-ultra-light);
+            color: var(--text-primary);
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            border-color: var(--border-light);
+        }
+
+        /* ================= Progress ================= */
+        .progress {
+            height: 8px;
+            border-radius: var(--radius-sm);
+            background: var(--border-light);
+        }
+
+        .progress-bar {
+            background: var(--primary-color);
+            border-radius: var(--radius-sm);
+        }
+
+        /* ================= Environmental Features ================= */
+        .carbon-badge {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: var(--transition-fast);
+        }
+
         .carbon-badge:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(27, 184, 2, 0.3);
         }
+
+        .carbon-badge .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .equivalent-item {
+            background: var(--primary-ultra-light);
+            border: 1px solid var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            text-align: center;
+            transition: var(--transition-fast);
+        }
+
+        .equivalent-item:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .impact-card {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid var(--primary-light);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge-earned {
+            animation: slideInUp 0.5s ease-out;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ================= Utility Classes ================= */
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            transition: var(--transition);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .rounded-modern {
+            border-radius: var(--radius-lg);
+        }
+
+        .shadow-modern {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-floating {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        /* ================= Responsive Design ================= */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .btn-lg {
+                padding: 0.7rem 1.25rem;
+                font-size: 0.9rem;
+            }
+            
+            .main-content {
+                padding-top: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 0.5rem 0;
+            }
+            
+            .dropdown-menu {
+                min-width: 200px;
+            }
+            
+            .btn-floating {
+                bottom: 1rem;
+                right: 1rem;
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        /* ================= Environmental Features ================= */
+        .carbon-badge {
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .carbon-badge:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
         .carbon-badge .badge {
             animation: pulse 2s infinite;
         }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        
-        /* Environmental equivalents styling */
+
         .equivalent-item {
-            transition: transform 0.2s ease;
+            transition: var(--transition);
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            background: var(--secondary-color);
+            border: 1px solid var(--border-color);
         }
+
         .equivalent-item:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
-        
-        /* Impact card gradient */
+
         .impact-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: var(--radius-xl);
         }
-        
-        /* Badge animations */
+
         .badge-earned {
             animation: slideInUp 0.5s ease-out;
         }
+
         @keyframes slideInUp {
             from {
                 transform: translateY(20px);
@@ -68,38 +580,136 @@
                 opacity: 1;
             }
         }
+
+        /* ================= Utility Classes ================= */
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+
+        .border-primary {
+            border-color: var(--primary-color) !important;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            transition: var(--transition);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* ================= Footer ================= */
+        footer {
+            background: var(--text-primary) !important;
+            margin-top: 4rem;
+        }
+
+        /* ================= Responsive Design ================= */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                padding: 1rem 0;
+            }
+            
+            .navbar-nav .nav-link {
+                margin: 0.25rem 0;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'shop:home' %}">E-Shop</a>
+            <a class="navbar-brand" href="{% url 'shop:home' %}">
+                <i class="fas fa-leaf me-2"></i>E-Shop
+            </a>
+            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_list' %}">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'shop:product_search' %}"><i class="fa fa-search"></i> Search</a></li>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:home' %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}">
+                            <i class="fas fa-box"></i> Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_search' %}">
+                            <i class="fas fa-search"></i> Search
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:cart_detail' %}"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'shop:wishlist' %}"><i class="fa fa-heart"></i> Wishlist</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'shop:cart_detail' %}">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                                {% if user.cart.items.count %}
+                                    <span class="badge bg-success">{{ user.cart.items.count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'shop:wishlist' %}">
+                                <i class="fas fa-heart"></i> Wishlist
+                            </a>
+                        </li>
+                        
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-bell"></i> Notifications
+                            <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell"></i> Notifications
                                 <span id="notification-count" class="badge bg-danger" style="display: none;">0</span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'shop:notifications' %}">View All Notifications</a></li>
-                                <li><a class="dropdown-item" href="{% url 'shop:stock_alerts_list' %}">Stock Alerts</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:notifications' %}">
+                                    <i class="fas fa-list"></i> View All
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:stock_alerts_list' %}">
+                                    <i class="fas fa-exclamation-triangle"></i> Stock Alerts
+                                </a></li>
                             </ul>
                         </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="impactDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-leaf"></i> Impact
+                                <i class="fas fa-leaf"></i> Impact
                                 {% if user.impact_summary.total_saved_kg %}
-                                <span class="badge bg-success">{{ user.impact_summary.total_saved_kg|floatformat:1 }}kg</span>
+                                    <span class="badge bg-success">{{ user.impact_summary.total_saved_kg|floatformat:1 }}kg</span>
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu">
@@ -117,31 +727,33 @@
                                         {% endif %}
                                     </small>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'shop:impact_dashboard' %}">
-                                    <i class="fas fa-seedling"></i> View Full Impact
-                                </a></li>
                             </ul>
+                        </li>
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-user"></i> {{ user.username }}
+                                <i class="fas fa-user"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'shop:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:profile' %}">
+                                    <i class="fas fa-user-circle"></i> Profile
+                                </a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'shop:logout' %}">Logout</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
                             </ul>
                         </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
-                    </li>
-                    {% if not user.is_authenticated %}
+                    {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'shop:login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'shop:login' %}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'shop:register' %}">Register</a>
+                            <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'shop:register' %}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
@@ -154,6 +766,15 @@
         <div class="container mt-3">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% else %}
+                        <i class="fas fa-info-circle me-2"></i>
+                    {% endif %}
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -162,19 +783,31 @@
     {% endif %}
 
     <!-- Main Content -->
-    <main class="container mt-4">
+    <main class="container my-4 main-content">
         {% block content %}
         {% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-5">
+    <footer class="bg-light border-top mt-5 py-4">
         <div class="container">
-            <p>&copy; 2025 E-Shop. All rights reserved.</p>
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start text-center">
+                    <h5 class="mb-2 text-primary">
+                        <i class="fas fa-leaf me-2"></i>E-Shop
+                    </h5>
+                    <p class="text-muted mb-0 small">Sustainable shopping for a better tomorrow.</p>
+                </div>
+                <div class="col-md-6 text-md-end text-center mt-3 mt-md-0">
+                    <p class="mb-1 text-dark small">&copy; 2025 E-Shop. All rights reserved.</p>
+                    <small class="text-muted">Building a greener future together 🌱</small>
+                </div>
+            </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
     {% if user.is_authenticated %}
     <script>
