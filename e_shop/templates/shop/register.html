@@ -1,320 +1,667 @@
 {% extends 'shop/base.html' %}
-{% load socialaccount %}
 
-{% block title %}Register - E-Shop{% endblock %}
+{% block title %}Join E-Shop - Create Your Account{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="auth-card">
-                <!-- Header Section -->
-                <div class="text-center mb-4">
-                    <div class="auth-icon mb-3">
-                        <i class="fas fa-user-plus fa-3x text-primary"></i>
-                    </div>
-                    <h2 class="fw-bold text-dark mb-2">Join E-Shop</h2>
-                    <p class="text-muted">Create your eco-friendly shopping account</p>
-                </div>
-
-                <!-- Google Sign-up Button -->
-                <div class="social-login mb-4">
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-google w-100">
-                        <i class="fab fa-google me-2"></i>
-                        Sign up with Google
-                    </a>
-                </div>
-                
-                <!-- Divider -->
-                <div class="divider mb-4">
-                    <span class="divider-text">or create with email</span>
-                </div>
-
-                <!-- Registration Form -->
-                <form method="post" class="auth-form">
-                    {% csrf_token %}
-                    
-                    <!-- Name Fields -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-6">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-user text-muted"></i>
-                                </span>
-                                {{ form.first_name }}
-                            </div>
-                            {% if form.first_name.errors %}
-                                <div class="field-error">{{ form.first_name.errors.0 }}</div>
-                            {% endif %}
+<div class="register-page">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-5 col-lg-4">
+                <div class="register-card">
+                    <!-- Header -->
+                    <div class="register-header text-center mb-4">
+                        <div class="brand-icon mb-3">
+                            <i class="fas fa-seedling"></i>
                         </div>
-                        <div class="col-6">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-user text-muted"></i>
-                                </span>
-                                {{ form.last_name }}
-                            </div>
-                            {% if form.last_name.errors %}
-                                <div class="field-error">{{ form.last_name.errors.0 }}</div>
-                            {% endif %}
-                        </div>
+                        <h1 class="register-title">Join E-Shop</h1>
+                        <p class="register-subtitle">Create your account for eco-friendly shopping</p>
                     </div>
-                    
-                    <!-- Username Field -->
-                    <div class="form-group mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-at text-muted"></i>
-                            </span>
+
+                    <!-- Registration Form -->
+                    <form method="post" class="register-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Error Messages -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Success/Error Messages -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }} mb-3">
+                                    {% if message.tags == 'error' %}
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                    {% elif message.tags == 'success' %}
+                                        <i class="fas fa-check-circle me-2"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle me-2"></i>
+                                    {% endif %}
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <!-- Name Fields Row -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                        First Name
+                                    </label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="field-error">
+                                            {% for error in form.first_name.errors %}
+                                                <small class="error-text">{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                        Last Name
+                                    </label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="field-error">
+                                            {% for error in form.last_name.errors %}
+                                                <small class="error-text">{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Username Field -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                Username
+                            </label>
                             {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="field-error">
+                                    {% for error in form.username.errors %}
+                                        <small class="error-text">{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% if form.username.errors %}
-                            <div class="field-error">{{ form.username.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Email Field -->
-                    <div class="form-group mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-envelope text-muted"></i>
-                            </span>
+                        
+                        <!-- Email Field -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                Email Address
+                            </label>
                             {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="field-error">
+                                    {% for error in form.email.errors %}
+                                        <small class="error-text">{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
-                        {% if form.email.errors %}
-                            <div class="field-error">{{ form.email.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Password Fields -->
-                    <div class="form-group mb-3">
-                        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-lock text-muted"></i>
-                            </span>
-                            {{ form.password1 }}
-                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password1">
-                                <i class="fas fa-eye"></i>
+                        
+                        <!-- Password Field -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                Password
+                            </label>
+                            <div class="password-input-container">
+                                {{ form.password1 }}
+                                <button type="button" class="password-toggle-btn" data-target="{{ form.password1.id_for_label }}">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            {% if form.password1.errors %}
+                                <div class="field-error">
+                                    {% for error in form.password1.errors %}
+                                        <small class="error-text">{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Password Strength Indicator -->
+                            <div class="password-strength mt-2" style="display: none;">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strength-fill"></div>
+                                </div>
+                                <small class="strength-text" id="strength-text">Password strength</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Confirm Password Field -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                Confirm Password
+                            </label>
+                            <div class="password-input-container">
+                                {{ form.password2 }}
+                                <div class="password-match-indicator" id="password-match" style="display: none;">
+                                    <i class="fas fa-times text-danger"></i>
+                                </div>
+                            </div>
+                            {% if form.password2.errors %}
+                                <div class="field-error">
+                                    {% for error in form.password2.errors %}
+                                        <small class="error-text">{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Terms Agreement -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="link-primary">Terms of Service</a> 
+                                and <a href="#" class="link-primary">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                                <span class="btn-text">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </span>
+                                <span class="btn-loading" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Creating Account...
+                                </span>
                             </button>
                         </div>
-                        {% if form.password1.errors %}
-                            <div class="field-error">{{ form.password1.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-lock text-muted"></i>
-                            </span>
-                            {{ form.password2 }}
-                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password2">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                        {% if form.password2.errors %}
-                            <div class="field-error">{{ form.password2.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Terms & Conditions -->
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" id="terms" required>
-                        <label class="form-check-label small" for="terms">
-                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> 
-                            and <a href="#" class="text-decoration-none">Privacy Policy</a>
-                        </label>
-                    </div>
-                    
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Create Account
-                        </button>
-                    </div>
-                </form>
-                
-                <!-- Footer Links -->
-                <div class="auth-footer text-center">
-                    <div class="signin-link">
-                        <span class="text-muted">Already have an account? </span>
-                        <a href="{% url 'shop:login' %}" class="text-decoration-none fw-semibold">
-                            Sign In
-                        </a>
+                    </form>
+
+                    <!-- Sign In Link -->
+                    <div class="register-footer text-center">
+                        <p class="sign-in-prompt">
+                            Already have an account? 
+                            <a href="{% url 'shop:login' %}" class="link-primary fw-medium">Sign In</a>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Custom Styles -->
+{% block extra_css %}
 <style>
-    .auth-container {
-        min-height: 90vh;
-        display: flex;
-        align-items: center;
-        background: linear-gradient(135deg, #f8fffe 0%, #f0fdf4 100%);
-        margin: -2rem -15px 0;
-        padding: 3rem 15px;
+    /* CSS Variables */
+    :root {
+        --primary-color: #1BB802;
+        --primary-light: #22c203;
+        --primary-dark: #16a102;
+        --primary-ultra-light: #f0fdf4;
+        --secondary-color: #f8f9fa;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --text-muted: #9ca3af;
+        --border-color: #e5e7eb;
+        --error-color: #dc2626;
+        --success-color: #16a34a;
+        --warning-color: #f59e0b;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
-    
-    .auth-card {
+
+    /* Page Layout */
+    .register-page {
+        background: linear-gradient(135deg, var(--primary-ultra-light) 0%, #ffffff 50%, var(--primary-ultra-light) 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .register-card {
         background: white;
         border-radius: 16px;
         padding: 2.5rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        border: 1px solid #f1f5f9;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
         max-width: 100%;
     }
-    
-    .auth-icon {
-        animation: fadeInScale 0.6s ease-out;
+
+    /* Header Styles */
+    .register-header .brand-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
     }
-    
-    @keyframes fadeInScale {
-        from {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1);
-        }
+
+    .register-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
     }
-    
-    .btn-google {
-        background: #ffffff;
-        border: 2px solid #e5e7eb;
-        color: #374151;
-        font-weight: 600;
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
+
+    .register-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 0;
     }
-    
-    .btn-google:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-        color: #374151;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    /* Form Styles */
+    .register-form {
+        margin-top: 2rem;
     }
-    
-    .divider {
-        position: relative;
-        text-align: center;
+
+    .form-group {
+        margin-bottom: 1.25rem;
     }
-    
-    .divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #e5e7eb;
+
+    .form-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        display: block;
     }
-    
-    .divider-text {
-        background: white;
-        padding: 0 1rem;
-        color: #9ca3af;
-        font-size: 0.9rem;
-    }
-    
-    .input-group-text {
-        background: #f8f9fa;
-        border-color: #e5e7eb;
-        color: #6b7280;
-    }
-    
+
     .form-control {
-        border-color: #e5e7eb;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
         padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        background-color: #ffffff;
     }
-    
+
     .form-control:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(27, 184, 2, 0.1);
+        outline: none;
     }
-    
-    .toggle-password {
-        border-left: none;
+
+    .form-control:invalid {
+        border-color: var(--error-color);
     }
-    
-    .field-error {
-        color: #dc3545;
-        font-size: 0.8rem;
-        margin-top: 0.25rem;
+
+    /* Password Field Styles */
+    .password-input-container {
+        position: relative;
+        display: block;
     }
-    
-    .form-check-input:checked {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
+
+    .password-input-container .form-control {
+        padding-right: 2.75rem;
+        width: 100%;
     }
-    
-    .auth-footer {
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #f1f5f9;
+
+    .password-toggle-btn {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        z-index: 10;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
-    .signin-link a {
+
+    .password-toggle-btn:hover {
+        color: var(--primary-color);
+        background-color: rgba(27, 184, 2, 0.1);
+    }
+
+    .password-toggle-btn:focus {
+        outline: none;
         color: var(--primary-color);
     }
-    
-    .signin-link a:hover {
-        color: var(--primary-dark);
+
+    .password-match-indicator {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        font-size: 0.9rem;
+        z-index: 5;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
+
+    .password-match-indicator.match {
+        color: var(--success-color) !important;
+    }
+
+    .password-match-indicator.match i {
+        color: var(--success-color) !important;
+    }
+
+    /* Password Strength Indicator */
+    .password-strength {
+        margin-top: 0.5rem;
+    }
+
+    .strength-bar {
+        width: 100%;
+        height: 4px;
+        background-color: var(--border-color);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-fill.weak { background-color: var(--error-color); width: 25%; }
+    .strength-fill.fair { background-color: var(--warning-color); width: 50%; }
+    .strength-fill.good { background-color: #3b82f6; width: 75%; }
+    .strength-fill.strong { background-color: var(--success-color); width: 100%; }
+
+    .strength-text {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    .strength-text.weak { color: var(--error-color); }
+    .strength-text.fair { color: var(--warning-color); }
+    .strength-text.good { color: #3b82f6; }
+    .strength-text.strong { color: var(--success-color); }
+
+    /* Error Styles */
+    .field-error {
+        margin-top: 0.25rem;
+    }
+
+    .error-text {
+        color: var(--error-color);
+        font-size: 0.8rem;
+        display: block;
+    }
+
+    /* Alert Styles */
+    .alert {
+        border: none;
+        border-radius: 8px;
+        padding: 0.875rem 1rem;
+        border-left: 4px solid;
+    }
+
+    .alert-danger {
+        background-color: #fef2f2;
+        color: var(--error-color);
+        border-left-color: var(--error-color);
+    }
+
+    .alert-success {
+        background-color: var(--primary-ultra-light);
+        color: var(--success-color);
+        border-left-color: var(--success-color);
+    }
+
+    .alert-info {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border-left-color: #3b82f6;
+    }
+
+    /* Checkbox Styles */
+    .form-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .form-check-input {
+        width: 1.125rem;
+        height: 1.125rem;
+        margin-top: 0.125rem;
+        flex-shrink: 0;
+        accent-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .link-primary {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .link-primary:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    /* Button Styles */
+    .btn-primary {
+        background: var(--primary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 0.875rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(27, 184, 2, 0.25);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+        background: var(--text-muted);
+        transform: none;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    /* Footer Styles */
+    .register-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .sign-in-prompt {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
-        .auth-container {
-            padding: 2rem 15px;
+        .register-page {
+            padding: 1rem 0;
         }
         
-        .auth-card {
-            padding: 2rem 1.5rem;
+        .register-card {
+            padding: 1.5rem;
+            margin: 0.5rem;
+            border-radius: 12px;
         }
         
-        .row.g-3 > .col-6 {
-            margin-bottom: 1rem;
+        .register-title {
+            font-size: 1.5rem;
+        }
+        
+        .brand-icon {
+            font-size: 2.5rem !important;
+        }
+        
+        .row.g-3 .col-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .register-card {
+            padding: 1rem;
         }
     }
 </style>
 
 <script>
-    // Toggle password visibility
-    document.querySelectorAll('.toggle-password').forEach(button => {
-        button.addEventListener('click', function() {
-            const target = this.getAttribute('data-target');
-            const passwordField = document.getElementById(`id_${target}`);
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.register-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const password1 = document.querySelector('#id_password1');
+    const password2 = document.querySelector('#id_password2');
+    
+    // Initialize password toggle buttons
+    const passwordToggleBtns = document.querySelectorAll('.password-toggle-btn');
+    passwordToggleBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetId = this.getAttribute('data-target');
+            const targetField = document.getElementById(targetId);
             const icon = this.querySelector('i');
             
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                passwordField.type = 'password';
-                icon.className = 'fas fa-eye';
+            if (targetField) {
+                if (targetField.type === 'password') {
+                    targetField.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                    this.setAttribute('aria-label', 'Hide password');
+                } else {
+                    targetField.type = 'password';
+                    icon.className = 'fas fa-eye';
+                    this.setAttribute('aria-label', 'Show password');
+                }
             }
         });
     });
     
-    // Form validation feedback
-    document.querySelector('.auth-form').addEventListener('submit', function(e) {
-        const password1 = document.getElementById('id_password1').value;
-        const password2 = document.getElementById('id_password2').value;
-        
-        if (password1 !== password2) {
-            e.preventDefault();
-            alert('Passwords do not match!');
-        }
-    });
-</script>
+    // Form submission handling
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            const termsCheckbox = document.getElementById('terms');
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                alert('Please accept the Terms of Service and Privacy Policy to continue.');
+                return false;
+            }
 
+            // Show loading state
+            if (btnText && btnLoading) {
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+
+    // Password strength checking
+    if (password1) {
+        password1.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            if (password2 && password2.value) {
+                checkPasswordMatch();
+            }
+        });
+    }
+
+    if (password2) {
+        password2.addEventListener('input', function() {
+            checkPasswordMatch();
+        });
+    }
+
+    function checkPasswordStrength(password) {
+        const strengthContainer = document.querySelector('.password-strength');
+        const strengthFill = document.getElementById('strength-fill');
+        const strengthText = document.getElementById('strength-text');
+
+        if (!strengthContainer || !strengthFill || !strengthText) return;
+
+        if (!password) {
+            strengthContainer.style.display = 'none';
+            return;
+        }
+
+        strengthContainer.style.display = 'block';
+
+        // Calculate strength
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+
+        let strength = 'weak';
+        let strengthLabel = 'Weak';
+
+        if (score === 4) {
+            strength = 'strong';
+            strengthLabel = 'Strong';
+        } else if (score === 3) {
+            strength = 'good';
+            strengthLabel = 'Good';
+        } else if (score >= 2) {
+            strength = 'fair';
+            strengthLabel = 'Fair';
+        }
+
+        strengthFill.className = `strength-fill ${strength}`;
+        strengthText.className = `strength-text ${strength}`;
+        strengthText.textContent = `Password strength: ${strengthLabel}`;
+    }
+
+    function checkPasswordMatch() {
+        const matchIndicator = document.getElementById('password-match');
+        
+        if (!matchIndicator || !password1 || !password2) return;
+        
+        if (!password2.value) {
+            matchIndicator.style.display = 'none';
+            return;
+        }
+
+        matchIndicator.style.display = 'flex';
+        
+        if (password1.value === password2.value && password2.value.length > 0) {
+            matchIndicator.classList.add('match');
+            matchIndicator.innerHTML = '<i class="fas fa-check text-success"></i>';
+        } else {
+            matchIndicator.classList.remove('match');
+            matchIndicator.innerHTML = '<i class="fas fa-times text-danger"></i>';
+        }
+    }
+});
+</script>
 {% endblock %}

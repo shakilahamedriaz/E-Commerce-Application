@@ -46,7 +46,8 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password')
 
-    return render(request, 'shop/login.html')
+    context = {}
+    return render(request, 'shop/login.html', context)
 
 
 # Register view
