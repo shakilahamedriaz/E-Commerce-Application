@@ -48,9 +48,9 @@
                                     <input type="password" name="password" id="password" 
                                            class="form-control border-start-0 border-end-0 ps-0" 
                                            placeholder="Enter your password" required>
-                                    <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <span class="input-group-text bg-light border-start-0 toggle-password" role="button" aria-label="Toggle password visibility" tabindex="0">
                                         <i class="fas fa-eye"></i>
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
 
@@ -140,6 +140,7 @@
         background: #f8f9fa;
         border-color: #e5e7eb;
         color: #6b7280;
+    padding: 0.75rem 0.875rem; /* match form-control vertical padding for alignment */
     }
     
     .form-control {
@@ -154,8 +155,9 @@
     }
     
     .toggle-password {
-        border-left: none;
-        transition: var(--transition-fast);
+    border-left: none;
+    transition: var(--transition-fast);
+    cursor: pointer;
     }
     
     .toggle-password:hover {
@@ -241,6 +243,13 @@
         } else {
             passwordField.type = 'password';
             icon.className = 'fas fa-eye';
+        }
+    });
+    // Keyboard accessibility for toggle
+    document.querySelector('.toggle-password')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
         }
     });
     
