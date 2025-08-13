@@ -1,4 +1,5 @@
 {% extends 'shop/base.html' %}
+{% load socialaccount %}
 
 {% block title %}Sign In | E-Shop{% endblock %}
 
@@ -82,7 +83,7 @@
 
                         <!-- Social Login -->
                         <div class="d-grid mb-4">
-                            <a href="#" class="btn btn-outline-dark">
+                            <a href="{% provider_login_url 'google' %}" class="btn btn-outline-dark">
                                 <i class="fab fa-google me-2"></i>Sign in with Google
                             </a>
                         </div>
