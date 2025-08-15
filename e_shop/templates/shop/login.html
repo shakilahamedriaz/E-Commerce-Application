@@ -1,7 +1,7 @@
 {% extends 'shop/base.html' %}
 {% load socialaccount %}
 
-{% block title %}Sign In | E-Shop{% endblock %}
+{% block title %}Sign In | GreenCart{% endblock %}
 
 {% block content %}
 <!-- Auth Container -->
@@ -63,7 +63,7 @@
                                         Remember me
                                     </label>
                                 </div>
-                                <a href="#" class="text-decoration-none text-primary fw-semibold small">
+                                <a href="{% url 'shop:password_reset_request' %}" class="text-decoration-none text-primary fw-semibold small">
                                     Forgot password?
                                 </a>
                             </div>

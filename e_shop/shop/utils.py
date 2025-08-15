@@ -4,6 +4,11 @@ import requests
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.models import User
+import secrets
 
 
 # this function generates the SSLCommerz payment URL
@@ -64,6 +69,40 @@ def send_order_confirmation_email(order):
         print(f"❌ Failed to send email for order #{order.id}: {str(e)}")
         print(f"📧 Email would have been sent to: {order.email}")
         print(f"💡 Check your email settings and Gmail App Password if using SMTP backend")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+# Password Reset Email Function
+def send_password_reset_email(user, request):
+    """Send password reset email with secure token"""
+    try:
+        # Generate token and uidb64
+        token = default_token_generator.make_token(user)
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Build reset URL
+        reset_url = request.build_absolute_uri(f'/password-reset-confirm/{uidb64}/{token}/')
+        
+        subject = "Password Reset Request - E-Shop"
+        message = render_to_string('shop/password_reset_email.html', {
+            'user': user,
+            'reset_url': reset_url,
+            'request': request
+        })
+        
+        from_email = settings.DEFAULT_FROM_EMAIL
+        to = user.email
+        
+        send_email = EmailMultiAlternatives(subject, '', from_email, [to])
+        send_email.attach_alternative(message, "text/html")
+        send_email.send()
+        
+        print(f"✅ Password reset email sent to {to}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to send password reset email: {str(e)}")
         import traceback
         traceback.print_exc()
         return False

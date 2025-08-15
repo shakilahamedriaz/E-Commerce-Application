@@ -7,6 +7,10 @@ urlpatterns = [
     path('login/', views.login_view, name="login"),
     path('register/', views.register_view, name="register"),
     path('logout/', views.logout_view, name="logout"),
+    
+    # Password Reset URLs
+    path('password-reset/', views.password_reset_request, name='password_reset_request'),
+    path('password-reset-confirm/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
 
     path('', views.home, name='home'),
     path('products/', views.product_list, name='product_list'),

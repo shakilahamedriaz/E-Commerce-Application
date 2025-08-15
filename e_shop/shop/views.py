@@ -4,11 +4,11 @@ from django.contrib.auth import login, logout, authenticate
 from .models import Category, Product, Rating, Cart, CartItem, Order, OrderItem, Wishlist, StockAlert, UserNotification, ProductReview, UserImpact, Badge, UserBadge, EnvironmentalImpact
 from .services.alternatives import greener_alternative, swap_ladder
 from django.contrib import messages
-from .forms import UserRegistrationForm, UserLoginForm, RatingForm, CheckoutForm, ProductReviewForm, StockAlertForm, AdvancedSearchForm
+from .forms import UserRegistrationForm, UserLoginForm, RatingForm, CheckoutForm, ProductReviewForm, StockAlertForm, AdvancedSearchForm, PasswordResetRequestForm, SetNewPasswordForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Min, Max, Avg, Count
 from django.contrib.auth.decorators import login_required
-from .utils import generate_sslcommerz_payment, send_order_confirmation_email
+from .utils import generate_sslcommerz_payment, send_order_confirmation_email, send_password_reset_email
 from decimal import Decimal
 from .services.budget import budget_status, update_budget
 from .services.simulator import project_scenario
@@ -25,6 +25,10 @@ from .services.carbon_intelligence import (
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.models import User
 
 
 
@@ -1018,3 +1022,71 @@ def enhanced_product_detail(request, slug):
         'alternative': alternative,
         'ladder': ladder,
     })
+
+
+# =================== Password Reset Views =================== #
+
+def password_reset_request(request):
+    """Handle password reset request"""
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                # Handle multiple users with same email - get the first one
+                user = User.objects.filter(email=email).first()
+                if user:
+                    email_sent = send_password_reset_email(user, request)
+                    if email_sent:
+                        messages.success(request, 
+                            f'Password reset instructions have been sent to {email}. '
+                            'Please check your email and follow the instructions.')
+                        return redirect('shop:login')
+                    else:
+                        messages.error(request, 'Failed to send password reset email. Please try again.')
+                else:
+                    # This shouldn't happen due to form validation, but just in case
+                    messages.error(request, 'No account found with this email address.')
+            except Exception as e:
+                messages.error(request, 'An error occurred while processing your request. Please try again.')
+                print(f"Password reset error: {e}")
+        else:
+            messages.error(request, 'Please enter a valid email address.')
+    else:
+        form = PasswordResetRequestForm()
+    
+    return render(request, 'shop/password_reset_request.html', {'form': form})
+
+
+def password_reset_confirm(request, uidb64, token):
+    """Handle password reset confirmation with token validation"""
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = SetNewPasswordForm(request.POST)
+            if form.is_valid():
+                password = form.cleaned_data['password1']
+                user.set_password(password)
+                user.save()
+                messages.success(request, 
+                    'Your password has been successfully reset. You can now log in with your new password.')
+                return redirect('shop:login')
+            else:
+                messages.error(request, 'Please correct the errors below.')
+        else:
+            form = SetNewPasswordForm()
+        
+        return render(request, 'shop/password_reset_confirm.html', {
+            'form': form,
+            'uidb64': uidb64,
+            'token': token
+        })
+    else:
+        messages.error(request, 
+            'The password reset link is invalid or has expired. Please request a new password reset.')
+        return redirect('shop:password_reset_request')
