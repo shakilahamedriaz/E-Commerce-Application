@@ -1,4 +1,9 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',  # Required for allauth
     'shop',  # created custom app for the e-shop 
+    'ai_chatbot_agent',  # AI chatbot app for customer support
 
 
     #required for social media authentication
@@ -252,7 +258,29 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'ai_chatbot_agent': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
+}
+
+# AI Chatbot Configuration
+HUGGINGFACE_API_TOKEN = os.getenv('HUGGINGFACE_API_TOKEN')
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+PINECONE_ENVIRONMENT = os.getenv('PINECONE_ENVIRONMENT')
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME', 'ecommerce-chatbot')
+
+# Chatbot Settings
+CHATBOT_CONFIG = {
+    'MODEL_NAME': 'Qwen/Qwen2-7B-Instruct',
+    'TEMPERATURE': 0.7,
+    'MAX_TOKENS': 500,
+    'TOP_P': 0.9,
+    'REPETITION_PENALTY': 1.1,
+    'VECTOR_DIMENSION': 384,
+    'MAX_SEARCH_RESULTS': 5,
 }
 
 

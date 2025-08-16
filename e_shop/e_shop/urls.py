@@ -8,6 +8,7 @@ from shop.admin import admin_site  # Import custom admin site
 urlpatterns = [
     path('admin/', admin_site.urls),  # Use custom admin site
     path('accounts/', include('allauth.urls')),  # Add allauth URLs
+    path('chatbot/', include('ai_chatbot_agent.urls')),  # AI Chatbot URLs
     path('', include('shop.urls')),
 ]
 

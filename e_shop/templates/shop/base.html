@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}GreenCart{% endblock %}</title>
     
     <!-- Bootstrap CSS -->
@@ -787,6 +788,9 @@
         {% block content %}
         {% endblock %}
     </main>
+
+    <!-- AI Chatbot Widget -->
+    {% include 'ai_chatbot_agent/chatbot_widget.html' %}
 
     <!-- Footer -->
     <footer class="bg-light border-top mt-5 py-4">
