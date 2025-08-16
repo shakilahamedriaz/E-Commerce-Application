@@ -11,15 +11,38 @@ db.sqlite3
 db.sqlite3-journal
 media/
 staticfiles/
+static/
+migrations/
 
-# Environment variables
+# Environment variables & Configuration
 .env
+.env.*
+.env.local
+.env.chatbot
+.env.production
+.env.development
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# AI/ML specific files
+*.model
+*.pkl
+*.joblib
+vector_store/
+models/
+embeddings/
+checkpoints/
+
+# API Keys and Secrets (double protection)
+*secret*
+*key*
+*token*
+config.json
+secrets.json
 
 # Distribution / packaging
 .Python
@@ -44,6 +67,9 @@ wheels/
 .idea/
 *.swp
 *.swo
+.vs/
+.sublime-project
+.sublime-workspace
 
 # OS generated files
 .DS_Store
@@ -58,7 +84,82 @@ Thumbs.db
 .coverage
 .pytest_cache/
 htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs and debugging
+*.log
+logs/
+admin_activities.log
+debug.log
+error.log
+
+# Production files
+collect_static/
+/static/
+/media/
+
+# Cache files
+.cache/
+.parcel-cache/
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Secret keys
 *.key
 *.pem
+
+# Database backups
+*.sql
+*.dump
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# User uploads (large files)
+uploads/
+files/
+documents/
+
+# AI Chatbot specific
+# Vector database files
+pinecone_cache/
+vector_cache/
+embeddings_cache/
+
+# Model files
+*.bin
+*.safetensors
+pytorch_model.bin
+tf_model.h5
+
+# LangChain cache
+.langchain/
+
+# Hugging Face cache
+.cache/huggingface/
+
+# Backup files
+*.backup
+*.bak
+
+# SSL certificates
+*.crt
+*.cert
+
+# Local development
+local/
+dev/
